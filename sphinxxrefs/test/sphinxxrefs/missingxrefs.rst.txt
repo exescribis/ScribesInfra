@@ -1,0 +1,25 @@
+    .. .. LOCAL TEMPLATE OVERRIDING DEFAULT ONE
+
+    .. .................................................................... `Undefined`
+
+    Undefined
+        .. TODO:: define Undefined
+
+        .. .. USAGE: (index.rst(2))
+
+    .. .. LOCAL TEMPLATE OVERRIDING DEFAULT ONE
+
+    .. ........................................................................ `ATerm`
+
+    ATerm
+        .. TODO:: define ATerm
+
+        .. .. USAGE: (index.rst)
+
+.. ...................................................... py:func:`UnknownFunction`
+
+..  py:func:: UnknownFunction(param, param, ...)
+
+    .. todo:: define function UnknownFunction
+
+    .. .. (index.rst)
