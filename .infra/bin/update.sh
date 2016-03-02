@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIBESINFRA=.
 SPHINXZONE=$SCRIBESINFRA/../SphinxZone
-DIRS="dbcase pyschemaspy sphinxdata sphinxgantt sphinxgithub sphinxgspread sphinxproblems sphinxuseocl sphinxse sphinxxrefs sqlrst libs"
+DIRS="dbcase pyschemaspy sphinxdata sphinxgantt sphinxgithub sphinxgspread sphinxproblems sphinxuseocl sphinxse sphinxxrefs sqlrst"
 FILES="`ls ${SPHINXZONE?}/*.py`"
 
 for dir in $DIRS
