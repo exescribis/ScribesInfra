@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-SCRIBESINFRA=../..
+SCRIBESINFRA=.
 SPHINXZONE=$SCRIBESINFRA/../SphinxZone
 DIRS="dbcase pyschemaspy sphinxdata sphinxgantt sphinxgithub sphinxgspread sphinxproblems sphinxuseocl sphinxse sphinxxrefs sqlrst libs"
 FILES="`ls ${SPHINXZONE?}/*.py`"
@@ -18,6 +18,6 @@ do
     cp ${SPHINXZONE?}/$name ${SCRIBESINFRA?}/$name
 done
 
-git -C ${SCRIBESINFRA?} add ${SCRIBESINFRA?}
-git -C ${SCRIBESINFRA?} commit -am 'update'
-git -C ${SCRIBESINFRA?} push origin master
+git add ${SCRIBESINFRA?}
+git commit -am 'update'
+git  push origin master

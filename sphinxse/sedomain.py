@@ -6,7 +6,7 @@ from docutils import nodes
 from sphinx import addnodes
 
 from sphinx.util.docfields import GroupedField
-from sphinxcontrib.domaintools import custom_domain
+from sphinxcontrib_domaintools import custom_domain
 
 
 # #-----------------------------------------------------------------------
