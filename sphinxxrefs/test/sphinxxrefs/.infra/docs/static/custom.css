@@ -1,0 +1,50 @@
+
+.rst-content .toggle .admonition-title {
+    display: block;
+    clear: both;
+    cursor: pointer;
+}
+
+.rst-content .toggle .admonition-title:after {
+    content: " ▼";
+}
+
+.rst-content .toggle .admonition-title.open:after {
+    content: " ▲";
+}
+
+.rst-content .toggle p:last-child {
+    margin-bottom: 0;
+}
+
+
+
+
+/*------ added to highlight system messages
+Useful when conf.py has keep_warnings
+*/
+
+.system-message {
+    color: red;
+    background: yellow;
+    padding: 5px ;
+}
+
+.system-message p {
+    font-size: 12px;
+    margin: 10px;
+}
+
+.system-message pre {
+    color:darkred;
+}
+
+
+.undefined {
+    background: yellow;
+    color: red;
+}
+
+.undefined pre {
+
+}
