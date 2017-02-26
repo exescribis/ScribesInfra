@@ -1,3 +1,7 @@
+"""
+Description of problems and set of problems.
+"""
+
 import os
 from collections import OrderedDict
 
@@ -13,17 +17,36 @@ def link(url, label):
 
 
 class Problem(object):
+    """
+    A problem with a type, a potential line, a potential source, message and content.
+    """
 
     def __init__(self, sphinxRootDirectory, type, line, source, message, content=''):
+        #: Type of the message. SEVERE, ERROR, WARNING, ...
         self.type = type
+
+        #: int|NoneType, line where the problem has been detected. Can be None
         self.line = line
+
+        #: str|NoneType, source file where the problem has been detected. Can be None
+        #: Sometime this is the full path name, sometimes a relative path name.
+        #: This depends on which piece of code generated the message.
+        #: Use fullFileName instead
         self.source = source
+
+        #: Short message describing the kind of problem.
         self.message = message
+
+        #: Remaining text with details about the problem.
         self.content = content
 
-        #: absolute path name of the rst file
+        #: Absolute path name of the rst file or None if the file cannot be found.
+        #: This field is computed from the ``source`` attribute.
+        #: Check if the file exists, otherwise it will be None.
         self.fullFileName = None   # computed by _computeFilenames
 
+        #: Just like the ``fullFileName`` attribute but relative to the
+        #: sphinx source directory. None if the file is not found.
         #: path to the source file, relative to the sphinx root directory
         self.relativeFileName = None # computed by _computeFilenames
 
@@ -64,22 +87,35 @@ class Problem(object):
 
 
 class UnknownProblem(Problem):
-
+    """
+    Unknown problem, that is problem that can be parsed no information.
+    """
     def __init__(self, sphinxRootDirectory, content=''):
-        Problem.__init__(self, sphinxRootDirectory, type='UNKNOWN', line=None, source=None, message='UNKNOWN')
+        Problem.__init__(self, sphinxRootDirectory, type='UNKNOWN',
+                         line=None, source=None, message='UNKNOWN',
+                         content=content)
 
 
 class ProblemManager(object):
-
+    """
+    A collection of problems.
+    """
 
     def __init__(self, sphinxRootDirectory=None):
         #: The sphinx root directory where rst source lives
         #: This value is used to display short filename when possible
         self.sphinxRootDirectory=sphinxRootDirectory
 
-        #:
+        #: dict[str,list[Problem]]
+        #: Problems found in the specified filename (absolute)
         self.problemListByFilename = OrderedDict()
+
+        #: dict[str,list[Problem]]
+        #: Problems for a given type (e.g. 'SEVERE').
         self.problemListByType = OrderedDict()
+
+        #: dict[str,list[Problem]]
+        #: Problems for a given message (e.g. 'Duplicate label')
         self.problemListByMessage = OrderedDict()
 
     def addProblem(self, problem):

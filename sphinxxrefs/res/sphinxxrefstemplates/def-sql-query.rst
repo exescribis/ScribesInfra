@@ -1,5 +1,5 @@
 
 ..  sql:query:: {label}(...)
 
-    ..  TODO:: define query {label}
+    ..  todo:: define query {label}
 

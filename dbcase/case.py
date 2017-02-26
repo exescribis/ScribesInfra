@@ -1,36 +1,38 @@
 # coding=utf-8
 
 """
-A DBCase is represented as a directory with a structure like the following.
-Most elements are optional:
+Management of "Database Case Studies".
 
-    <Name>
+A DBCase is represented by a directory with a structure like the following.
+Most elements are optional::
+
+    <DBCaseName>
         index.rst
-        <Name>.schema.sql       Optional. Can be inferred from default state
-        <Name>.queries.sql
-        states
-            default
-                <R1>.csv
-                <R2>.csv
+        <DBCaseName>.schema.sql     Optional. Can be inferred from default state
+        *.queries.sql               SQL files containing SELECT or CREATE VIEW queries
+        states                      Directory containing database states
+            default                 Default state used for instance to infer schema if needed
+                <R1>.csv            CSV representation of the relation R1
+                <R2>.csv            CSV representation of the relation R2
                 ...
                 <Rn>.csv
-            <StateName2>
+            <StateName2>            Another CSV-based state
                 <R1>.csv
                 ...
+            <StateName3>            Google spreadsheet state
+                <googlecode>.gs     Reference to the google spreadsheet
 
-    Case
-        * directory
-        * name
-        * hasSchema
-        * stateMap
-        * hasStates
-        * defaultState
-        * querySetMap
-        * querySetIndexFilename
-        * buildDirectory
-        * sphinxRootDirectory
+
+This generates::
+
+    .build/
+        <DBCaseName>.schema.sql             Schema either inferred or copies from source directory
+        <DBCaseName>.schema.generated.rst   Corresponding schema documentation
+        <DBCaseName>.queries.generated.rst  Documentation of all queries
+        <QUERY>.generated.rst  ...          Individual documentation of queries
 
 """
+
 
 
 from collections import OrderedDict
@@ -42,14 +44,53 @@ from filehelpers import directoryItemPaths, saveContent, ensureDirectory, fileCo
 
 
 class Case(object):
-    def __init__(self, caseDirectory, sphinxRootDirectory):
+    """
+    (Database) Case. This is the main class of the package. It represents the whole
+    case study. This class has the following attributes:
 
-        #: directory of the case.
+    * directory
+    * name
+    * hasSchema
+    * stateMap
+    * hasStates
+    * defaultState
+    * querySetMap
+    * querySetIndexFilename
+    * buildDirectory
+    * sphinxRootDirectory
+
+    """
+    def __init__(self, caseDirectory, sphinxRootDirectory, buildDirectory=None):
+        """
+
+        Args:
+            caseDirectory: directory representingthe database case
+
+            sphinxRootDirectory: Sphinx root directory (the one containing the makefile usually)
+
+            buildDirectory:
+                build directory where output go. If None is specified then
+                goes to '.build'
+
+        Returns: None
+
+        """
+
+        # "d""
+        # :param caseDirectory (str): The directory containing the database case.
+        # :param sphinxRootDirectory (str):
+        #     The root directory for the sphinx documentation.
+        #     This parameter is required because sphinx include statements are generated
+        #     and are relative to this directory.
+        #
+        # :return: The DBCase created.
+
+        #: Directory of the case.
         #: str.
         self.directory = removeTrailingSeparator(caseDirectory)
         assert os.path.isdir(self.directory)
 
-        #: sphinx root directory (the one containing the makefile usually).
+        #: Sphinx root directory (the one containing the makefile usually).
         #: This is required to have includes inside includes
         #: as they must be defined using a pseudo absolute root
         #: from this root (see _pathFromRootSphinxDirectory).
@@ -57,18 +98,19 @@ class Case(object):
         self.sphinxRootDirectory = removeTrailingSeparator(sphinxRootDirectory)
         assert os.path.isdir(self.sphinxRootDirectory)
 
-        #: name of the case.
+        #: Name of the case.
         #: str.
         self.name = os.path.basename(self.directory)
         print '  case named %s' % self.name
 
         #: '.build' directory where all generated files go.
-        #: This directory will be created in build()
+        #: This directory will be created in the build() operation.
         #: str.
-        self.buildDirectory = os.path.join(self.directory, '.build')
+        self.buildDirectory = self._buildDirectory(buildDirectory)
 
-        #: google credential file or None if this file does not exist
+        #: Google credential file or None if this file does not exist
         #: This file allows to connect to google spreadsheet for states.
+        #: str.
         self.googleCredentialsJsonFile = \
             self._tryToGetGoogleCredentials(self.sphinxRootDirectory)
 
@@ -76,12 +118,12 @@ class Case(object):
         #: This directory will be created in build()
         # self.tmpDirectory = os.path.join(self.buildDirectory, 'tmp')
 
-        #: dict[string,State]. Map stateName -> State.
         #: All states in the 'states' directory. These states
         #: can be easily conveted to 'INSERT' statements and
         #: a schema ('CREATE' statements) can be inferred as well.
         #: see :class:State.
         #: Can be empty if there is no states.
+        #: dict[string,State]. Map stateName -> State.
         self.stateMap = OrderedDict(sorted({
             os.path.basename(state_dir) : stateFactory(state_dir, self)
             for state_dir in self._getStateDirectories()
@@ -89,7 +131,7 @@ class Case(object):
         print '  %s state(s) found: %s' % (len(self.stateMap), self.stateMap.keys())
 
         #: A case may have no state.
-        #! bool.
+        #: bool.
         self.hasStates = len(self.stateMap.keys()) > 0
 
         #: State|None
@@ -117,18 +159,22 @@ class Case(object):
         else:
             print '  no schema found or inferred'
 
-        #: dict[string,QuerySet], Map queryiesName -> QuerySet
         #: All queries from the *.queries.sql in the case directory.
+        #: dict[string,QuerySet], Map queryiesName -> QuerySet
         self.querySetMap = OrderedDict(sorted({
             queries_file : QuerySet(queries_file, self)
             for queries_file in self._getQueriesFiles()
         }.items()))
 
-        #: str|None
         #: Name of the index file for queries
+        #: str|None
         self.querySetIndexFilename = None  # defined by build
 
     def getDefaultState(self):
+        """
+        Return the "default" state for this case.
+        :return: State
+        """
         if len(self.stateMap)==0:
             return None
         elif 'default' in self.stateMap.keys():
@@ -136,7 +182,20 @@ class Case(object):
         else:
             return list(self.stateMap)[0]
 
+    def _buildDirectory(self, buildDirectory=None):
+        if buildDirectory is None:
+            return os.path.join(self.directory, '.build')
+        else:
+            return buildDirectory
+
     def _tryToGetGoogleCredentials(self, directory):
+        """
+        Try to get google credentials from ``GoogleScribesBot.json`` file.
+        This is necessary to be able to get access if needed to google
+        spreadsheets in the case of google spreadsheet states.
+        :param directory: The directory containing ``GoogleScribesBot.json``.
+        :return: Pathname of the file ``GoogleScribesBot.json`` or None
+        """
         credentials_file = os.path.join(directory,'GoogleScribesBot.json')
         if os.path.isfile(credentials_file):
             return credentials_file
@@ -178,6 +237,10 @@ class Case(object):
             return None
 
     def _getStateDirectories(self):
+        """
+        Get the list of state directories
+        :return (list[str]):
+        """
         states_directory = os.path.join(self.directory, 'states')
         if (os.path.isdir(states_directory)):
             # there is a 'states' directory, directories inside are states name
@@ -188,6 +251,10 @@ class Case(object):
             return []
 
     def _getQueriesFiles(self):
+        """
+        Get the list of queries files, those ending with ``.queries.sql``.
+        :return (list[str]):
+        """
         return sorted(
                     directoryItemPaths(
                         self.directory,
@@ -224,6 +291,10 @@ class Case(object):
 
 
     def build(self):
+        """
+        Build derived artefacts for this case in the build directory.
+        :return: None
+        """
         ensureDirectory(self.buildDirectory)
         if self.hasSchema:
             # FIXME: called twice, why?
@@ -238,9 +309,6 @@ class Case(object):
             self.schema.build(self.buildDirectory)
 
         self._buildQuerySets()
-
-
-
 
 
 if __name__ == "__main__":

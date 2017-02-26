@@ -1,9 +1,12 @@
+"""
+sphinxdata extension for sphinx processor.
 
+Adds a 'sql' domain.
+Adds lexer for 'sql' and 'relational_algebra'.
+"""
 from sphinxdata.lexers.ra import RelationalAlgebraLexer
 from sphinxdata.lexers.camelcasesql import CamelCaseSqlLexer
-from sphinxdata.sqldomain import SQLTableSignatureNode, html_argumentlist_visit, html_argumentlist_depart, \
-    argumentlist_visit, argumentlist_depart, SQLTableColumnNode, html_argument_visit, html_argument_depart, \
-    argument_visit, argument_depart, parse_signature_with_kind, \
+from sphinxdata.sqldomain import \
     app_add_node_addSQLTableSignatureNode, \
     app_add_node_addSQLTableColumnNode, \
     sql_custom_domain

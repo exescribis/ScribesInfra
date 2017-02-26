@@ -4,8 +4,7 @@ Pygment lexer for "camel case" SQL:
 * CamelCase words are expected to be relation names
 * camelCase words are expected to be column names
 
-
-This code is derived the offical lexer `sql.py`_.
+This code is derived the official lexer `sql.py`_.
 
 ..  _`sql.py`:
     https://bitbucket.org/birkenfeld/pygments-main/src/91624f2da452d5e01f3df63f00dd4e82c949274f

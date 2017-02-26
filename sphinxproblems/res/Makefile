@@ -1,17 +1,6 @@
-GROUPDIR        = .
-INFRADIR        = .infra
-BUILDDIR        = $(GROUPDIR)/.build/docs
-SPHINXOPTS      = -c $(INFRADIR)/docs
-SHINXERRORSOUT  = $(BUILDDIR)/sphinx-problems.txt
-SPHINXBUILD     = sphinx-build
-SCRIBESINFRA     = ../ScribesInfra
+# this makefile is no longer necessary since the various phase is now implemented in python
+# just kept here for the record
 
-
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) $(GROUPDIR)
-
-clean:
-	rm -rf $(BUILDDIR)/*
-	mkdir -p $(BUILDDIR)
 
 html:
 	mkdir -p $(BUILDDIR)

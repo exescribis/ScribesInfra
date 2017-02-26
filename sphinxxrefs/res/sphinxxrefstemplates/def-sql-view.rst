@@ -1,5 +1,5 @@
 
 ..  sql:view:: {label}(...)
 
-    ..  TODO:: define view {label}
+    ..  todo:: define view {label}
 

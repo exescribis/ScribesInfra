@@ -1,11 +1,13 @@
 # coding=utf-8
 
-import os
-import json
-import unicodecsv
-import gspread
-from oauth2client.client import SignedJwtAssertionCredentials
+import  os
+import  json
+import  unicodecsv
+import  gspread
+from    oauth2client.client import SignedJwtAssertionCredentials
 
+# FIXME: see https://github.com/google/oauth2client/issues/401
+# SignedJwtAssertionCredentials has been removed
 
 def googleSpreadSheetToCSVFiles(credentialsJsonFile, spreadSheetKey, outputDirectory):
     json_key = json.load(open(credentialsJsonFile))

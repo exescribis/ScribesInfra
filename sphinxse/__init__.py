@@ -1,4 +1,9 @@
+"""
+sphinxse extension allows to document some "software engineering" artefacts
+with the sphinx documentation generator.
 
+Provides a se domain and a xglossary directive.
+"""
 
 import sphinxse.sedomain
 import sphinxse.xglossary

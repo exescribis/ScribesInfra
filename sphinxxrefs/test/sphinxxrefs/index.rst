@@ -1,15 +1,21 @@
-..  glossary::
-    :kiki:
+sphinxxrefs
+===========
 
-    ATerm
+..  glossary::
+
+    ADefinedTerm
         avec sa definition
 
 
-This is `ATerm` which is defined and another wich is not defined `Undefined`.
-An example of :py:func:`UnknownFunction`. Yet another occurrence of `Undefined`.
+The `ADefinedTerm` is defined in the glossary. This just create a reference to the term.
 
-azazavvz
------
+By contrast `AnUndefinedTerm` is not defined. This create an entry in the list of undefined terms.
+There is only one entry per term. So an other occurrence of `AnUndefinedTerm` will not generate
+a new entry.
+
+All undefined terms are in the :download:`.infra/docs/problems/missing-xrefs.rst` file.
+
+An example of :py:func:`UnknownFunction`.
 
 
 :ref:`genindex`

@@ -1,5 +1,7 @@
 SPHINXOPTS    = -c . -q -w buildErrors.txt
-SPHINXBUILD   = /usr/share/PyVEnvs27/ScribesEnv/bin/sphinx-build
+# SPHINXBUILD   = /usr/share/PyVEnvs27/ScribesEnv/bin/sphinx-build
+SPHINXBUILD   = sphinx-build
+
 PAPER         =
 BUILDDIR      = .build
 
@@ -29,3 +31,6 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+viewdoc:    html
+	firefox .build/index.html &

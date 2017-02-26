@@ -5,6 +5,8 @@ import codecs
 from sphinx import addnodes
 from collections import Counter
 
+import filehelpers
+
 debug=False
 
 XXX='XXX'
@@ -69,6 +71,8 @@ def _getDefinitionTemplate(app, domain, type):
             return content
         else:
             return None
+
+
 
 
 class MissingXRefTable(object):
@@ -180,7 +184,8 @@ class MissingXRef(object):
         return self.domain+':'+self.type+':'+self.label+' '+self.usage()
 
 def missxrefs_file(app):
-    return os.path.join(app.srcdir,'.infra','docs','problems','missing-xrefs.rst')
+    file =  os.path.join(app.srcdir,'.infra','docs','problems','missing-xrefs.rst')
+    return file
 
 
 
@@ -199,6 +204,8 @@ NO_REFERENCE_PROBLEM = '\n'.join(
 def builder_inited_handler(app):
     if not app.tags.has('sphinx-problems-rerun'):
         file = missxrefs_file(app)
+        dir = os.path.dirname(file)
+        filehelpers.ensureDirectory(dir)
         with open(file,'w') as f:
             f.write(NO_REFERENCE_PROBLEM)
 
@@ -270,6 +277,7 @@ def build_finished_handler(app, exception):
             missing_xrefs.add(domain, type, label,docname)
 
         missing_output_file = missxrefs_file(app)
+        # print "WRITE ",missing_output_file
         with codecs.open(missing_output_file, "w", "utf-8") as f:
             f.write(missing_xrefs.unknownReferencesRSTPage(app))
 

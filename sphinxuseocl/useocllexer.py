@@ -54,7 +54,7 @@ class UseOCLLexer(RegexLexer):
             (words((
                 'Tuple','allInstances','and','any','append','asBag','asOrderedSet','asSequence','asSet','at',
                 'characters','closure','collecNested','collect','concat','count','div','equalsIgnoreCase','excludes',
-                'excludesAll','excluding','exists','false','first','flatten','floor','forAll','forall','implies',
+                'excludesAll','excluding','exists','false','first','flatten','floor','forAll','implies',
                 'includes','includesAll','including','indexOf','insertAt','intersection','isEmpty','isUnique',
                 'iterate','last','max','min','mod','not','notEmpty','oclAsType','oclIsInState','oclIsKindOf',
                 'oclIsNew','oclIsTypeOf','one','or','prepend','product','reject','reverse','result','round','select',

@@ -1,5 +1,28 @@
 # -*- coding: utf-8 -*-
 
+"""
+Define a sql domain with 4 directives::
+
+    ..  sql:table::
+    ..  sql:query::
+    ..  sql:view::
+    ..  sql:constraints::
+
+These objects are added to the index and can be referenced inline like :sql:table:`MyTable`.
+
+See the documentation in this package for more information.
+
+"""
+
+
+__all__ = [
+    'sql_custom_domain',
+    'app_add_node_addSQLTableSignatureNode',
+    'app_add_node_addSQLTableColumnNode'
+]
+
+
+
 import re
 
 from docutils import nodes
@@ -109,6 +132,7 @@ def _get_column_node(m):
         return addnodes.desc_parameter(m.group(0), m.group(0))
 
 
+#-----------------------------------------------------------------------
 
 def parse_signature_with_kind(kind):
 
@@ -207,7 +231,7 @@ sql_custom_domain = \
                 objtype = 'constraint',
                 objname       = "Constraint",
                 indextemplate = "pair: %s; constraint",
-                parse         = parse_signature_with_kind('view'),
+                parse         = parse_signature_with_kind('view'),  # TODO check what to do
             ),
 
         )

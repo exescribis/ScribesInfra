@@ -30,6 +30,11 @@ Remarques
     Le corps de la remarque sur plusieurs lignes
     mais toujours indentées.
 
+..  se:remark:: R002 Titre de la remarque.
+
+    Le corps de la remarque sur plusieurs lignes
+    mais toujours indentées.
+
 Questions
 """""""""
 
@@ -101,8 +106,10 @@ Testing xglossary
         toto
 
     alpha
-        :toto:
-        :titi:
+        :toto: c'est le champ toto
+        :titi: et voici le champ titi
+
+        le coeur de la definition
 
 Index
 -----

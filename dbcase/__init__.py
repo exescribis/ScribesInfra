@@ -1,5 +1,16 @@
 # coding=utf-8
 
+"""
+Management of Database Case Studies (DBCase).
+
+This package contains various modules providing abstractions over the directory
+representation of a DBCase::
+* dbcase.case
+* dbcase.schema
+* dbcase.state
+* dbcase.queries
+"""
+
 from __future__ import print_function
 import sys
 

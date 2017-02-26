@@ -1,22 +1,15 @@
 # coding=utf-8
 
 """
+Abstraction of the schema of a database case study.
+As an input, the schema is either
+* represented explictely as a ``*schema.sql`` file
+* or inferred from the default state.
 
-    Schema
-        * name
-        * case
-        * sqlRst
-        * sourceFilename
-        * buildFilename
-        * isGenerated
-        * blocks
-        * buildRstFile
-        * build()
-
-    Build the following files and directory
-        * ``.build/<casename>.schema.sql``: the sql schema, either inferred or copied
-        * ``.build/<name>.schema.generated.rst``: rst description of the schema
-        * ``.build/schemaspy``: the schema spy documentation of the default state
+As an output the the following files and directories are build
+* ``.build/<casename>.schema.sql``: the sql schema, either inferred or copied
+* ``.build/<name>.schema.generated.rst``: rst description of the schema
+* ``.build/schemaspy``: the schema spy documentation of the default state
 """
 
 import os
@@ -29,6 +22,18 @@ from filehelpers import saveContent
 import pyschemaspy
 
 class Schema(object):
+    """
+    Schema.
+    * name
+    * case
+    * sqlRst
+    * sourceFilename
+    * buildFilename
+    * isGenerated
+    * blocks
+    * buildRstFile
+    * build()
+    """
 
     def __init__(self, name, case, sqlRstContent, schemaFilename=None, isGenerated=False):
         #: Name of the schema
@@ -100,6 +105,3 @@ class Schema(object):
         self.__saveSchemaFile(buildDirectory)
         self.__buildSchemaRSTFile(buildDirectory)
         self.__buildSchemaSpy(buildDirectory)
-
-
-

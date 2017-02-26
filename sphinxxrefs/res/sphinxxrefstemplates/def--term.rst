@@ -1,4 +1,4 @@
 
     {label}
-        .. TODO:: define term {label}
+        .. todo:: define the term {label}
 

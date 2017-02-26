@@ -16,8 +16,8 @@ import sphinx_rtd_theme
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-project = u'SandboxDB'
-copyright = u'2015, (CC)(SA)(BY)escribis'
+project = u'sphinxrelinks'
+copyright = u'2017, (CC)(SA)(BY)escribis'
 author = u'escribis'
 version = '0.1'
 release = '0.1'

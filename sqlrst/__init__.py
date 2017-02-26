@@ -1,8 +1,8 @@
 # coding=utf-8
 
 """
-Transform a sql piece of text (including comments and various sql statement) into a
-rst blocks. The comments can contain rst text.
+Transform a RST-annotated SQL piece of text into a RST blocks.
+The comments can contain REST text.
 """
 
 import filehelpers

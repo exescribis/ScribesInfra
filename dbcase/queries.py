@@ -1,46 +1,21 @@
 # coding=utf-8
 
 """
+Management of datatbase queries and their evaluation on states.
 
+This package contains the following class hierarchy::
 
     QuerySet
-        * filename
-        * name
-        * sql
-        * case
-        * blocks
-        * buildRstFile
-        * v queryList
 
     Query
-        * ^ querySet
-        * key
-        * queryIndex
-        * block
-        *
-        * v queryEvaluationMap
-
         SelectQuery
-
         CreateViewQuery
 
     QueryEvaluation
-        * ^ query
-        * name
-        * state
-        * error
-        * csvFile
-        * rowNumber
-        * outFile
-
         SelectQueryEvaluation
-
         CreateViewQueryEvaluation
 
 """
-
-
-
 
 
 import os
@@ -55,24 +30,40 @@ from filehelpers import fileContent
 
 
 class QuerySet(object):
+    """
+    QuerySet
+        * filename
+        * name
+        * sql
+        * case
+        * blocks
+        * buildRstFile
+        * v queryList
+    """
 
     def __init__(self, queriesFilename, case):
 
         #: filename of the queries file.
         self.filename = queriesFilename
-        #: name of the query set, without numbering information at the beginning
+
         _ = os.path.basename(self.filename).replace('.queries.sql','')
+        #: name of the query set, without numbering information at the beginning
         self.name = re.sub('^[0-9]+_','',_)
+
         #: SQL Text correspoding to the query files
         self.sql = fileContent(self.filename)
+
         #: Case containing this QuerySet
         self.case = case
+
         #: Schema text cut in logical blocks.
         #: list[sqlrst.structure.Block]
         self.blocks = sqlrst.parser.sqlRstToBlockSequence(self.sql)
+
         #: list[Query].
         #: List of queries extracted from the query set.
         self.queryList = self.__extractQueries()
+
         #: str|None.
         #: filename of the generated rst file
         self.buildRstFile = None   # will be filled by build()
@@ -97,6 +88,11 @@ class QuerySet(object):
         return result
 
     def _buildRSTFile(self, buildDirectory):
+        """
+        Generate RST query set file named ``*.generated.rst``
+        :param buildDirectory (str): path to the str directory.
+        :return: None
+        """
         print '    generating RST QuerySet file',
         outFileName = self.name+'.generated.rst'
         self.buildRstFile = os.path.join(buildDirectory,outFileName)
@@ -122,21 +118,39 @@ class QuerySet(object):
 
 
 class Query(object):
+    """
+    Query
+        * ^ querySet
+        * key
+        * queryIndex
+        * block
+        *
+        * v queryEvaluationMap
+
+        SelectQuery
+
+        CreateViewQuery
+    """
 
     def __init__(self, block, querySet, queryIndex):
+
         #: int
         #: The index in the list of queries  of the querySet
         self.queryIndex = queryIndex
+
         #: sqlrst.structure.Block
         #: Reference to the file block where this query is defined.
         self.block = block
+
         #: QuerySet
         #: QuerySet in which this query is defined.
         self.querySet = querySet
+
         #: str
         #: Either the name of the block or the index of the key prefixed
         #: by the query set name.
         self.key = self._getKey()
+
         #: OrderedDict[State,QueryEvaluation]|None.
         #: Defined by the build method. There is one
         #: query evaluation for each state.
@@ -164,7 +178,9 @@ class Query(object):
 
 
 class SelectQuery(Query):
-
+    """
+    SELECT queries.
+    """
     def __init__(self, block, querySet, queryIndex):
         Query.__init__(self, block, querySet, queryIndex)
 
@@ -173,7 +189,9 @@ class SelectQuery(Query):
 
 
 class CreateViewQuery(Query):
-
+    """
+    CREATE VIEW queries.
+    """
     def __init__(self, block, querySet, queryIndex):
         Query.__init__(self, block, querySet, queryIndex)
 
@@ -182,21 +200,44 @@ class CreateViewQuery(Query):
 
 
 class QueryEvaluation(object):
+    """
+    QueryEvaluation
+        * ^ query
+        * name
+        * state
+        * error
+        * csvFile
+        * rowNumber
+        * outFile
+    """
 
     def __init__(self, query, state):
+        #: Query that is evaluated
         self.query = query
+
+        #: State used to evaluate the query
         self.state = state
+
+        #: Name of the state evaluation
         self.name = self.query.key  # +'_'+self.state.name
+
+        #: Error raised during the evaluation, if any.
         #: None if the evaluation was ok, the exception raise otherwise
-        self.error = None # field by build(), None if error
-        #: filled by build(), None if error
+        self.error = None # filled by build(), None if error
+
+        #: Path of the csvfile resulting from the query evaluation or None
+        #: in case
+        #: Filled by build(), None if error
         self.csvFile = None
-        #: filled by build(), None if error
+
+        #: Filled by build(), None if error
         self.rowNumber = None
+
         # None before build, but always exists otherwise.
         # Either contains an error or some message such as the number of rows.
         # The file could be empty as well.
         self.outFile = None
+
         #: Exception|None
 
     def _computeCSVAndOutputFileNames(self, buildDirectory):
@@ -225,11 +266,16 @@ class QueryEvaluation(object):
     def build(self, buildDirectory):
         pass
 
+
+
+
 import dbcase
 from filehelpers import saveContent
 
 class SelectQueryEvaluation(QueryEvaluation):
-
+    """
+    Evaluation of a :class:`SelectQuery`.
+    """
     def __init__(self, query, state):
         QueryEvaluation.__init__(self, query, state)
 
@@ -256,7 +302,9 @@ class SelectQueryEvaluation(QueryEvaluation):
 
 
 class CreateViewQueryEvaluation(QueryEvaluation):
-
+    """
+    Evaluation of a :class:`CreateViewQuery`.
+    """
     def __init__(self, query, state):
         QueryEvaluation.__init__(self, query, state)
 

@@ -1,3 +1,3 @@
 
     {label}
-        .. TODO:: define {label}
+        .. todo:: define {label}

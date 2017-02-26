@@ -1,31 +1,38 @@
 # coding=utf-8
 
 """
-    State
-        * ^ case
-        * sourceDirectory
-        * name
-        * typeTables
-        * databaseEngine
-        * stateBuildDirectory
+Management of database states.
+States are represented by a directory containing the data to be load in the database.
+This data can be represented as a set of csv files, as a reference towards a google
+spreadsheet documents, etc.
 """
-
 
 import os
 import re
 import shutil
 
-import dbhelpers
+import sqlhelpers
 from filehelpers import ensureDirectory, saveContent
 
 import typedtable
-
+from abc import ABCMeta, abstractmethod
 
 class State(object):
     """
-    Abstraction of a state. A state is represented by a directory.
-    Various concrete representations are possibles.
+    Abstract class representing a database state.
+    A state is basically represented by a directory containing a database
+    content. Various concrete representations are available as subclasses.
+
+    State
+    * ^ case
+    * sourceDirectory
+    * name
+    * typeTables
+    * databaseEngine
+    * stateBuildDirectory
     """
+    __metaclass__ = ABCMeta
+
     def __init__(self, stateDirectory, case):
 
         #: source directory of the state.
@@ -46,31 +53,70 @@ class State(object):
         #: Build directory. Created with build()
         self.stateBuildDirectory = None
 
+    @abstractmethod
+    def build(self, buildDirectory):
+        """
+        Build the derived artefact for this state.
+        :param buildDirectory: The "build" directory.
+        :return: None
+        """
+        pass
 
 
 class TypedTablesState(State):
+    """
+    State represented as a collection of typed tables.
+    In practice subclasses are to be used in order to create these typed tables
+    from a concrete representations such as a directory of CSV files.
+    """
 
     def __init__(self, stateDirectory, case, typedTables):
         State.__init__(self, stateDirectory=stateDirectory, case=case)
+
+        #:
         self.typedTables = typedTables
 
     def getSQLCreateStatements(self):
+        """
+        Get the SQL code containing the CREATE statements forming the
+        schema of the database.
+        :return (str): SQL code containing CREATE statements
+        """
         return '\n\n'.join([
             typed_table.getSQLCreateStatement() for typed_table in self.typedTables.values()
         ])
 
     def getSQLInsertStatements(self):
+        """
+        Get the SQL code containing the INSERT statements to create the database
+        contnent.
+        :return (str):
+        """
         return '\n\n'.join([
             typed_table.getSQLInsertStatements() for typed_table in self.typedTables.values()
         ])
 
     def getInferredSchema(self):
+        """
+
+        :return:
+        """
         return self.getSQLCreateStatements()
 
     def setDatabaseEngine(self, engine):
+        """
+
+        :param engine:
+        :return:
+        """
         self.databaseEngine = engine
 
     def build(self, buildDirectory):
+        """
+
+        :param buildDirectory:
+        :return:
+        """
 
         def __createStateBuildDirectory():
             states_directory = os.path.join(buildDirectory, 'states')
@@ -81,7 +127,7 @@ class TypedTablesState(State):
         def __createEmptyDatabase():
             # create the database
             dbname = '%s_%s' % (self.case.name, self.name)
-            e = dbhelpers.SQLiteDatabaseEngine(self.stateBuildDirectory, dbname, isNewDatabase=True)
+            e = sqlhelpers.SQLiteDatabaseEngine(self.stateBuildDirectory, dbname, isNewDatabase=True)
             self.setDatabaseEngine(e)
 
         def __executeDatabaseSchema():
@@ -112,9 +158,8 @@ class TypedTablesState(State):
 
 
 class CSVFilesState(TypedTablesState):
-
     """
-    State represented as a directory containing one csv file for each table.
+    State represented by a directory containing one csv file for each table.
     Name of files are assumed to be name of tables (+'.csv' extenstion).
     The files are read and a map of tableName -> typedTable is created.
     """

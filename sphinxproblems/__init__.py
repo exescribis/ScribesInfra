@@ -1,10 +1,8 @@
 import os
 
 import docutils.nodes
-
-# from sphinxproblems.problems # import Problem, MANAGER
-
-import problems
+import sphinxproblems.parser
+import sphinxproblems.problems
 
 def on_doctree_read(app, doctree):
     print '#'*30+' doctree-read '+'#'*10+' '+os.path.basename(doctree['source'])+' '+'#'*30
@@ -42,7 +40,7 @@ def on_missing_reference(app, env, node, contnode):
     print node.pformat()
     print '.'*80
 
-import sphinxerrorparser
+
 
 def on_build_finished(app, exception):
     print '#'*500

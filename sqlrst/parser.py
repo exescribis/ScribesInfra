@@ -1,8 +1,8 @@
 # coding=utf-8
 
 """
-Take a sql text with some rst comments and convert it to a sequence
-of blocks according to the module `structure`.
+Take a SQL text with some RST comments and convert it to a sequence
+of blocks according to the module :module:`structure`.
 """
 
 import re
