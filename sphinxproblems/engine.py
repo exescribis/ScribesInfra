@@ -125,7 +125,7 @@ class SphinxProblemsEngine(object):
         if self.clean:
             filehelpers.ensureEmptyDir(self.targetDir)
         filehelpers.ensureDirectory(self.targetDir)
-        raw_input('cont')
+        # raw_input('cont')
 
         #------ execute phase #1
         exit_code = self._phase1ExecuteSphinxForNormalDocProduction()
@@ -134,18 +134,18 @@ class SphinxProblemsEngine(object):
         if exit_code != 0:
             print('**** ERROR ****: sphinx exit with code %s in phase #1' % exit_code)
             print(' '*8+'errors can be found in "%s"' %  self.sphinxErrorsPhase1)
-            raw_input('cont')
+            # raw_input('cont')
             return exit_code
         if not os.path.isfile(self.rawProblemFile):
             if debug:
                 print ('sphinxproblems: no problems found. no file %s ' % self.rawProblemFile)
-            raw_input('cont')
+            # raw_input('cont')
             return 0
         else:
 
             #----- execute phase 2
             self._phase2ExtractAndGenerateProblemsDoc()
-            raw_input('cont')
+            # raw_input('cont')
 
 
             #----- execute phase 3
