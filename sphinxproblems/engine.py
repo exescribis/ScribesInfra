@@ -153,13 +153,13 @@ class SphinxProblemsEngine(object):
             if exit_code != 0:
                 print('**** ERROR ****: sphinx exit with code %s in phase #3' % exit_code)
                 print(' ' * 8 + 'errors can be found in "%s"' % self.sphinxErrorsPhase3)
-                raw_input('cont')
+                # raw_input('cont')
                 return exit_code
-            raw_input('cont')
+            # raw_input('cont')
             #----- execute phase 4
             self._phase4PatchHTMLFiles()
             print (self.shortStatus)
-            raw_input('cont')
+            # raw_input('cont')
             return 0
 
 
@@ -246,7 +246,7 @@ class SphinxProblemsEngine(object):
         additional_arguments = [
             '-T',                   # Display the full traceback when an unhandled exception occurs.
             '-b', 'html',           # Build HTML pages. This is the default builder.
-            '-d', self.docTrees,    # Directory of the doctree pickles
+            # '-d', self.docTrees,    # Directory of the doctree pickles
             '-c', self.confDir,     # Directory containing the conf.py file
             self.sourceDir,         # Source directory
             self.targetDir,         # target directory

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+    MODIFIED VERSION OF https://bitbucket.org/klorenz/sphinxcontrib-domaintools/src/2f14f33947dba5e1ad94fe8e35b3866f1d641f08/sphinxcontrib/domaintools.py?at=default&fileviewer=file-view-default
+    THE LINE MARKED WIT
+
     sphinxcontrib.domaintools
     =========================
 
@@ -32,7 +35,7 @@ from sphinx.directives import ObjectDescription
 from sphinx.util import ws_re
 from sphinx.util.nodes import clean_astext, make_refnode
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 
 
 class GenericObject(ObjectDescription):
@@ -76,7 +79,7 @@ class GenericObject(ObjectDescription):
                 indextype = 'single'
                 indexentry = self.indextemplate % (name,)
             self.indexnode['entries'].append((indextype, indexentry,
-                                              targetname, ''))
+                                              targetname, '', None)) #%JFE added None to avoid error
         self.env.domaindata[self.domain]['objects'][self.objtype, name] = \
             self.env.docname, targetname
 

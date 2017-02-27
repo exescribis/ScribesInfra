@@ -3,7 +3,36 @@ Code to patch readthedocs html files.
 """
 
 import re
-debug = True
+debug = False
+
+
+
+
+DUPLICATED_SCRIPTS=[
+    """<script type="text/javascript" src="[./]*_static/translations.js"></script>""",
+    """<script type="text/javascript" src="[./]*_static/sphinxcontrib-images/LightBox2/lightbox2/js/jquery-1.11.0.min.js"></script>""",
+    """<script type="text/javascript" src="[./]*_static/sphinxcontrib-images/LightBox2/lightbox2/js/lightbox.min.js"></script>""",
+    """<script type="text/javascript" src="[./]*_static/sphinxcontrib-images/LightBox2/lightbox2-customize/jquery-noconflict.js"></script>"""
+]
+
+def removeDuplicatedScripts(file):
+    # FIXME: The scripts below are duplicated for unknown reasons in phase #3. To be investigated
+    # This is not the case when using a makefile with explicit call to sphinx-build
+    # It might be due to the fact that the sphinx API is called directly ? parameters ? state ?
+    # The solution below 'DUPLICATED_SCRIPTS" and 'removeDuplicatedScripts' is a really ugly workaround
+    with open(file, 'r') as f:
+        content = f.read()
+    new_content = content
+    for script in DUPLICATED_SCRIPTS:
+        new_content = re.sub(script, '', new_content, flags=re.MULTILINE, count=1)
+    changed = new_content != content
+    if changed:
+        with open(file, 'w') as f:
+            f.write(new_content)
+        if debug:
+            print('removed duplicated scripts in file %s' % file)
+    return changed
+
 
 def includeProblemLineInRTFDTheme(file, levelFromHtmlRoot, problemLine):
     """
@@ -63,4 +92,7 @@ def processFiles(rootDirectory, problemLine):
         level = len(reldir.split('/'))-1
         for file in files:
             if file.endswith('.html'):
-                includeProblemLineInRTFDTheme(os.path.join(dir, file),level,problemLine)
+                file_path = os.path.join(dir, file)
+                print 'exploring %s' % file_path
+                removeDuplicatedScripts(file_path)
+                includeProblemLineInRTFDTheme(file_path,level,problemLine)
