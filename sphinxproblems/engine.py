@@ -16,7 +16,7 @@ import sphinxproblems.parser
 import sphinxproblems.patchhtml
 
 
-debug=True
+debug=False
 showOutputAndErrors=False
 
 import sphinx

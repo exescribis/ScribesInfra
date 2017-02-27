@@ -24,7 +24,8 @@ def removeDuplicatedScripts(file):
         content = f.read()
     new_content = content
     for script in DUPLICATED_SCRIPTS:
-        new_content = re.sub(script, '', new_content, flags=re.MULTILINE, count=1)
+        total_count = len(re.findall(script, new_content, flags=re.MULTILINE))
+        new_content = re.sub(script, '', new_content, flags=re.MULTILINE, count=total_count-1)
     changed = new_content != content
     if changed:
         with open(file, 'w') as f:
@@ -33,6 +34,30 @@ def removeDuplicatedScripts(file):
             print('removed duplicated scripts in file %s' % file)
     return changed
 
+# Here is the makefile that makes it work
+# GROUPDIR        = .
+# INFRADIR        = .infra
+# BUILDDIR        = $(GROUPDIR)/.build/docs
+# # BUILDDIR        = ../m2cci.github.io/m2cci-pi/root
+# SPHINXOPTS      = -c $(INFRADIR)/docs
+# # SHINXERRORSOUT  = $(BUILDDIR)/sphinx-problems.txt
+# # SPHINXBUILD     = sphinx-build
+# SCRIBESINFRA    = ../ScribesInfra
+#
+#
+# ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) $(GROUPDIR)
+#
+# clean:
+# 	rm -rf $(BUILDDIR)/* $(BUILDDIR)/.[!.]*
+# 	mkdir -p $(BUILDDIR)
+#
+# html:
+# 	mkdir -p $(BUILDDIR)
+# 	$(SPHINXBUILD) -q -b html $(ALLSPHINXOPTS) $(BUILDDIR) -w $(SHINXERRORSOUT) # 2>/dev/null
+#   python $(SCRIBESINFRA)/sphinxproblems problemsToRST $(GROUPDIR) $(BUILDDIR)
+#   $(SPHINXBUILD) -Q -t sphinx-problems-rerun -b html $(ALLSPHINXOPTS) $(BUILDDIR)
+#   python $(SCRIBESINFRA)/sphinxproblems patchHTMLFiles $(GROUPDIR) $(BUILDDIR)
+#   echo "\nOpen $(BUILDDIR)/index.html in a browser to see the documentation"
 
 def includeProblemLineInRTFDTheme(file, levelFromHtmlRoot, problemLine):
     """
@@ -93,6 +118,5 @@ def processFiles(rootDirectory, problemLine):
         for file in files:
             if file.endswith('.html'):
                 file_path = os.path.join(dir, file)
-                print 'exploring %s' % file_path
                 removeDuplicatedScripts(file_path)
                 includeProblemLineInRTFDTheme(file_path,level,problemLine)
