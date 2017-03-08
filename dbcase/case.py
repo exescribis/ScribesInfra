@@ -4,6 +4,7 @@
 Management of "Database Case Studies".
 
 A DBCase is represented by a directory with a structure like the following.
+See documentation of SandboxDB_.
 Most elements are optional::
 
     <DBCaseName>

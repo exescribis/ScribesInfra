@@ -48,7 +48,8 @@ class QuerySet(object):
 
         _ = os.path.basename(self.filename).replace('.queries.sql','')
         #: name of the query set, without numbering information at the beginning
-        self.name = re.sub('^[0-9]+_','',_)
+        # self.name = re.sub('^[0-9]+_','',_)
+        self.name = _
 
         #: SQL Text correspoding to the query files
         self.sql = fileContent(self.filename)
@@ -160,7 +161,10 @@ class Query(object):
         if hasattr(self.block, 'name'):
             return self.block.name
         else:
-            return self.querySet.name+'_'+str(self.queryIndex)
+            if self.queryIndex == 1:
+                return self.querySet.name
+            else:
+                return self.querySet.name+'_'+str(self.queryIndex)
 
     def _createQueryEvaluation(self, state):
         raise NotImplementedError('Each subclass must implement this method')

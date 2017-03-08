@@ -19,7 +19,8 @@ import sqlrst.parser
 import sqlrst.printer
 from filehelpers import saveContent
 
-import pyschemaspy
+# TODO: activate pyschemaspy again
+# import pyschemaspy
 
 class Schema(object):
     """
@@ -104,4 +105,5 @@ class Schema(object):
         print '  Building Schema ... '
         self.__saveSchemaFile(buildDirectory)
         self.__buildSchemaRSTFile(buildDirectory)
-        self.__buildSchemaSpy(buildDirectory)
+        # TODO: activate pyschemaspy again
+        # self.__buildSchemaSpy(buildDirectory)

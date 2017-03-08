@@ -6,7 +6,8 @@ MAIN_DIR = os.path.join(os.path.abspath(DOC_DIR),'..','..','..')
 sys.path.insert(0, MAIN_DIR)
 sys.path.insert(0, os.path.join(MAIN_DIR,'libs'))
 extensions = [
-    'sphinxse'
+    'sphinxse',
+    'sphinxuseocl'        # just for some pretty printing in UseCase model test
 ]
 
 source_suffix = '.rst'
@@ -16,7 +17,7 @@ import sphinx_rtd_theme
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-project = u'SandboxDB'
+project = u'TEST'
 copyright = u'2015, (CC)(SA)(BY)escribis'
 author = u'escribis'
 version = '0.1'

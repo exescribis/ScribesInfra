@@ -4,14 +4,19 @@ import  os
 import  json
 import  unicodecsv
 import  gspread
-from    oauth2client.client import SignedJwtAssertionCredentials
 
 # FIXME: see https://github.com/google/oauth2client/issues/401
 # SignedJwtAssertionCredentials has been removed
+# from    oauth2client.client import SignedJwtAssertionCredentials
+
+
 
 def googleSpreadSheetToCSVFiles(credentialsJsonFile, spreadSheetKey, outputDirectory):
     json_key = json.load(open(credentialsJsonFile))
     scope = ['https://spreadsheets.google.com/feeds']
+    # FIXME: see https://github.com/google/oauth2client/issues/401
+    #  SignedJwtAssertionCredentials has been removed
+    raise NotImplementedError('FIXME: see https://github.com/google/oauth2client/issues/401')
     credentials = SignedJwtAssertionCredentials(
         json_key['client_email'],
         json_key['private_key'],
