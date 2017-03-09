@@ -20,4 +20,4 @@ done
 
 git add ${SCRIBESINFRA?}
 git commit -am 'update'
-git  push origin master
+git push origin master
