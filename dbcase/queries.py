@@ -17,6 +17,7 @@ This package contains the following class hierarchy::
 
 """
 
+from __future__ import print_function
 
 import os
 import re
@@ -94,21 +95,21 @@ class QuerySet(object):
         :param buildDirectory (str): path to the str directory.
         :return: None
         """
-        print '    generating RST QuerySet file',
+        print( '    generating RST QuerySet file', end=" ")
         outFileName = self.name+'.generated.rst'
         self.buildRstFile = os.path.join(buildDirectory,outFileName)
         rst = sqlrst.printer.blockSequenceToRst(self.blocks, indentSQL=1)
 
         filehelpers.saveContent(self.buildRstFile, rst)
-        print outFileName,
-        print ' ... done'
+        print(outFileName, end=" ")
+        print(' ... done')
 
     def _buildQueries(self, buildDirectory):
         for query in self.queryList:
             query.build(buildDirectory)
 
     def build(self, buildDirectory):
-        print '  Building QuerySet ... '
+        print('  Building QuerySet ... ')
         self._buildRSTFile(buildDirectory)
         self._buildQueries(buildDirectory)
 
@@ -284,7 +285,7 @@ class SelectQueryEvaluation(QueryEvaluation):
         QueryEvaluation.__init__(self, query, state)
 
     def build(self, buildDirectory):
-        print '    SELECT %s ... ' % self.name,
+        print('    SELECT %s ... ' % self.name),
         self._computeCSVAndOutputFileNames(buildDirectory)
         query = self.query.block.sqlText
         try:
@@ -302,7 +303,7 @@ class SelectQueryEvaluation(QueryEvaluation):
             else:
                 self.rowNumber = len(list(result))
                 saveContent(self.outFile,'%s row(s)' % self.rowNumber)
-            print  ' %s rows. done' % self.rowNumber
+            print(' %s rows. done' % self.rowNumber)
 
 
 class CreateViewQueryEvaluation(QueryEvaluation):
@@ -313,13 +314,13 @@ class CreateViewQueryEvaluation(QueryEvaluation):
         QueryEvaluation.__init__(self, query, state)
 
     def build(self, buildDirectory):
-        print '    CREATE VIEW %s ; ' % self.name,
+        print('    CREATE VIEW %s ; ' % self.name, end=" ")
         try:
             self.state.databaseEngine.execute(self.query.block.sqlText)
         except Exception as e:
             self._executionError(e)
         else:
-            print 'SELECT * ',
+            print('SELECT * ', end=" ")
             self._computeCSVAndOutputFileNames(buildDirectory)
             query = 'SELECT * FROM %s; ' % self.query.block.name
             try:
@@ -337,4 +338,4 @@ class CreateViewQueryEvaluation(QueryEvaluation):
                 else:
                     self.rowNumber = len(list(result))
                     saveContent(self.outFile,'%s row(s)' % self.rowNumber)
-                    print  ' %s rows. done' % self.rowNumber
+                    print(' %s rows. done' % self.rowNumber)
