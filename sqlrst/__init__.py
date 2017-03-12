@@ -28,13 +28,3 @@ def sqlRstFile2RstFile(inputFile, outputFile):
     :param outputFile: the rst file.
     """
     filehelpers.generateFile(inputFile, outputFile, sqlRst2Rst)
-
-if __name__ == "__main__":
-    import sys
-    import os.path
-    inputFile = sys.argv[1]
-    outputFile = sys.argv[2]
-    if not os.path.isfile(inputFile):
-        print('No such file : %s' % inputFile)
-        exit(1)
-    sqlRstFile2RstFile(sys.argv[1], sys.argv[2])
