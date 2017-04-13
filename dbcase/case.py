@@ -61,7 +61,7 @@ class Case(object):
     * sphinxRootDirectory
 
     """
-    def __init__(self, caseDirectory, sphinxRootDirectory, buildDirectory=None):
+    def __init__(self, caseDirectory, sphinxRootDirectory, buildDirectory=None, verbose=False):
         """
 
         Args:
@@ -76,6 +76,8 @@ class Case(object):
         Returns: None
 
         """
+
+        self.verbose = verbose
 
         # "d""
         # :param caseDirectory (str): The directory containing the database case.
@@ -102,7 +104,8 @@ class Case(object):
         #: Name of the case.
         #: str.
         self.name = os.path.basename(self.directory)
-        print '  case named %s' % self.name
+        if verbose:
+            print('  case named %s' % self.name)
 
         #: '.build' directory where all generated files go.
         #: This directory will be created in the build() operation.
@@ -129,7 +132,8 @@ class Case(object):
             os.path.basename(state_dir) : stateFactory(state_dir, self)
             for state_dir in self._getStateDirectories()
             }.items()))
-        print '  %s state(s) found: %s' % (len(self.stateMap), self.stateMap.keys())
+        if self.verbose:
+            print('  %s state(s) found: %s' % (len(self.stateMap), self.stateMap.keys()))
 
         #: A case may have no state.
         #: bool.
@@ -139,10 +143,11 @@ class Case(object):
         #: default state. It is either named default or this will be
         #: the first one or None if there is no state at all.
         self.defaultState = self.getDefaultState()
-        if self.defaultState is None:
-            print '  No state found. No database will be build.'
-        else:
-            print '  %s is the default state.' % self.defaultState.name
+        if self.verbose:
+            if self.defaultState is None:
+                print('  No state found. No database will be build.')
+            else:
+                print('  %s is the default state.' % self.defaultState.name)
 
         #: Schema object, either inferred from default state or taken from
         #: an explicit .schema.sql file.
@@ -153,17 +158,18 @@ class Case(object):
         #: bool.
         self.hasSchema = self.schema is not None
 
-        if self.hasSchema and self.schema.isGenerated:
-            print '  schema inferred from default state'
-        elif self.hasSchema and not self.schema.isGenerated:
-            print '  explicit schema found'
-        else:
-            print '  no schema found or inferred'
+        if self.verbose:
+            if self.hasSchema and self.schema.isGenerated:
+                print ('  schema inferred from default state')
+            elif self.hasSchema and not self.schema.isGenerated:
+                print ('  explicit schema found')
+            else:
+                print ('  no schema found or inferred')
 
         #: All queries from the *.queries.sql in the case directory.
         #: dict[string,QuerySet], Map queryiesName -> QuerySet
         self.querySetMap = OrderedDict(sorted({
-            queries_file : QuerySet(queries_file, self)
+            queries_file : QuerySet(queries_file, self, verbose=self.verbose)
             for queries_file in self._getQueriesFiles()
         }.items()))
 
@@ -223,7 +229,8 @@ class Case(object):
                     self,
                     fileContent(explicit_schema_file),
                     schemaFilename=explicit_schema_file,
-                    isGenerated=False)
+                    isGenerated=False,
+                    verbose=self.verbose)
 
         elif self.hasStates:
             sql_rst = self.defaultState.getInferredSchema()
@@ -232,8 +239,8 @@ class Case(object):
                     self,
                     sql_rst,
                     schemaFilename=None,
-                    isGenerated=True
-            )
+                    isGenerated=True,
+                    verbose = self.verbose)
         else:
             return None
 
@@ -242,6 +249,7 @@ class Case(object):
         Get the list of state directories
         :return (list[str]):
         """
+        # TODO: change "states" to "States to get uniform naming"
         states_directory = os.path.join(self.directory, 'states')
         if (os.path.isdir(states_directory)):
             # there is a 'states' directory, directories inside are states name
@@ -280,9 +288,11 @@ class Case(object):
             index_content += (
                 '..  include:: %s\n\n'% self._pathFromRootSphinxDirectory(query_set.buildRstFile)
             )
-        print '    saving %s ... '  % index_filename
+        if self.verbose:
+            print('    saving %s ... '  % index_filename)
         saveContent(index_filename, index_content)
-        print 'done'
+        if self.verbose:
+            print('done')
 
     def _buildQuerySets(self):
         for querySet in self.querySetMap.values():
@@ -298,16 +308,16 @@ class Case(object):
         """
         ensureDirectory(self.buildDirectory)
         if self.hasSchema:
-            # FIXME: called twice, why?
+            # FIXME: called twice, why?  Code below commebted  self.hasSchema = self.schema is not None
             self.schema.build(self.buildDirectory)
             if self.hasStates:
                 for state in self.stateMap.values():
                     state.build(self.buildDirectory)
 
-        # create the schema documentation in case.schema.rst
-        if self.schema is not None:
-            # FIXME: called twice, why?
-            self.schema.build(self.buildDirectory)
+        # # create the schema documentation in case.schema.rst
+        # if self.schema is not None:
+        #     # FIXME: called twice, why?
+        #     self.schema.build(self.buildDirectory)
 
         self._buildQuerySets()
 
@@ -317,9 +327,18 @@ if __name__ == "__main__":
     import os
     import sys
 
+    verbose= '-v' in sys.argv
+    if verbose:
+        sys.argv.remove('-v')
+
+    # print '-----',verbose
+    # exit(0)
+
     SPHINX_DOCS_DIRECTORY=os.path.realpath(sys.argv[1])
     for case_directory in sys.argv[2:]:
-        print 'Analysing case %s' % case_directory
-        c = Case(case_directory, SPHINX_DOCS_DIRECTORY)
-        print 'Building case %s' % case_directory
+        if verbose:
+            print('Analysing case %s' % case_directory)
+        c = Case(case_directory, SPHINX_DOCS_DIRECTORY, verbose=verbose)
+        if verbose:
+            print('Building case %s' % case_directory)
         c.build()

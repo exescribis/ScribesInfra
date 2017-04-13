@@ -42,7 +42,7 @@ class QuerySet(object):
         * v queryList
     """
 
-    def __init__(self, queriesFilename, case):
+    def __init__(self, queriesFilename, case, verbose=False):
 
         #: filename of the queries file.
         self.filename = queriesFilename
@@ -70,6 +70,8 @@ class QuerySet(object):
         #: filename of the generated rst file
         self.buildRstFile = None   # will be filled by build()
 
+        self.verbose = verbose
+
     def __extractQueries(self):
         """
         Transforms the block list into queries of appropriate type.
@@ -95,21 +97,25 @@ class QuerySet(object):
         :param buildDirectory (str): path to the str directory.
         :return: None
         """
-        print( '    generating RST QuerySet file', end=" ")
+        if self.verbose:
+            print( '    -> file', end=" ")
         outFileName = self.name+'.generated.rst'
         self.buildRstFile = os.path.join(buildDirectory,outFileName)
         rst = sqlrst.printer.blockSequenceToRst(self.blocks, indentSQL=1)
 
         filehelpers.saveContent(self.buildRstFile, rst)
-        print(outFileName, end=" ")
-        print(' ... done')
+        if self.verbose:
+            print(outFileName, end=" ")
+            print(' ... done')
 
     def _buildQueries(self, buildDirectory):
         for query in self.queryList:
             query.build(buildDirectory)
 
     def build(self, buildDirectory):
-        print('  Building QuerySet ... ')
+        if self.verbose:
+            print('  '
+                  '%s ... ' % self.name)
         self._buildRSTFile(buildDirectory)
         self._buildQueries(buildDirectory)
 
@@ -159,8 +165,11 @@ class Query(object):
         self.queryEvaluationMap = self.__createEmptyQueryEvaluation()
 
     def _getKey(self):
-        if hasattr(self.block, 'name'):
-            return self.block.name
+        if self.block.name is not None:
+            if self.block.name == '.':
+                return self.querySet.name
+            else:
+                return self.block.name
         else:
             if self.queryIndex == 1:
                 return self.querySet.name
@@ -285,7 +294,7 @@ class SelectQueryEvaluation(QueryEvaluation):
         QueryEvaluation.__init__(self, query, state)
 
     def build(self, buildDirectory):
-        print('    SELECT %s ... ' % self.name),
+        print('    SELECT {:<50}'.format(self.name), end=' ')
         self._computeCSVAndOutputFileNames(buildDirectory)
         query = self.query.block.sqlText
         try:
@@ -303,7 +312,7 @@ class SelectQueryEvaluation(QueryEvaluation):
             else:
                 self.rowNumber = len(list(result))
                 saveContent(self.outFile,'%s row(s)' % self.rowNumber)
-            print(' %s rows. done' % self.rowNumber)
+            print(' {:>5}'.format(self.rowNumber) )
 
 
 class CreateViewQueryEvaluation(QueryEvaluation):
@@ -314,13 +323,12 @@ class CreateViewQueryEvaluation(QueryEvaluation):
         QueryEvaluation.__init__(self, query, state)
 
     def build(self, buildDirectory):
-        print('    CREATE VIEW %s ; ' % self.name, end=" ")
+        print('    *VIEW* {:<48}**'.format(self.name), end=' ')
         try:
             self.state.databaseEngine.execute(self.query.block.sqlText)
         except Exception as e:
             self._executionError(e)
         else:
-            print('SELECT * ', end=" ")
             self._computeCSVAndOutputFileNames(buildDirectory)
             query = 'SELECT * FROM %s; ' % self.query.block.name
             try:
@@ -338,4 +346,5 @@ class CreateViewQueryEvaluation(QueryEvaluation):
                 else:
                     self.rowNumber = len(list(result))
                     saveContent(self.outFile,'%s row(s)' % self.rowNumber)
-                    print(' %s rows. done' % self.rowNumber)
+                    print(' {:>5}'.format(self.rowNumber))
+

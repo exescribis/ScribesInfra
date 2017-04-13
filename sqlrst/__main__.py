@@ -1,4 +1,5 @@
 import sys
+import sys
 import os.path
 import sqlrst
 

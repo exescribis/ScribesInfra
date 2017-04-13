@@ -82,8 +82,9 @@ class NamedBlock(Block):
         Block.__init__(self)
         self.name = name
 
-class SelectStatementBlock(SQLStatementBlock):
-    def __init__(self, sqlText):
+class SelectStatementBlock(SQLStatementBlock, NamedBlock):
+    def __init__(self, sqlText, name=None):
+        NamedBlock.__init__(self, name)
         super(SelectStatementBlock, self).__init__(sqlText)
 
 class CreateTableStatementBlock(SQLStatementBlock, NamedBlock):

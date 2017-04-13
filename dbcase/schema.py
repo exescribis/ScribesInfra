@@ -12,6 +12,7 @@ As an output the the following files and directories are build
 * ``.build/schemaspy``: the schema spy documentation of the default state
 """
 
+from __future__ import print_function
 import os
 
 import filehelpers
@@ -36,7 +37,10 @@ class Schema(object):
     * build()
     """
 
-    def __init__(self, name, case, sqlRstContent, schemaFilename=None, isGenerated=False):
+    def __init__(self, name, case, sqlRstContent, schemaFilename=None, isGenerated=False, verbose=False):
+
+        self.verbose = verbose
+
         #: Name of the schema
         self.name = name
 
@@ -66,20 +70,25 @@ class Schema(object):
         self.buildRstFile = None   # will be filled by build()
 
     def __saveSchemaFile(self, buildDirectory):
-        print '    saving SQL Schema file',
+        if self.verbose:
+            print('    saving SQL Schema file', end=' ')
         self.buildFilename = os.path.join(buildDirectory, self.name+'.schema.sql')
         saveContent(self.buildFilename, self.sqlRst)
-        print ' ... done'
+        if self.verbose:
+            print(' ... done')
 
     def __buildSchemaRSTFile(self, buildDirectory):
-        print '    generating RST Schema file ',
+        if self.verbose:
+            print('    generating RST Schema file ', end=' ')
         self.buildRstFile = os.path.join(buildDirectory, self.name+'.schema.generated.rst')
         rst = sqlrst.printer.blockSequenceToRst(self.blocks, indentSQL=1)
         filehelpers.saveContent(self.buildRstFile, rst)
-        print ' ... done'
+        if self.verbose:
+            print(' ... done')
 
     def __buildSchemaSpy(self, buildDirectory):
-        print '    generating schemaspy documentation ',
+        if self.verbose:
+            print('    generating schemaspy documentation ', end=' ')
         default_state_name = self.case.getDefaultState().name
         default_database = os.path.join(buildDirectory, '%s_%s.sqlite3' % (
             self.case.name, default_state_name))
@@ -91,10 +100,10 @@ class Schema(object):
             e.build(
                 outputDirectory=output_directory)
         except ValueError:
-            print '**** ERROR: ', e.lastExitCode
-            print 'see ', e.lastCommandOutputFile
-
-        print ' ... done'
+            print('**** ERROR: %s' % e.lastExitCode)
+            print('see %s' % e.lastCommandOutputFile)
+        if self.verbose:
+            print(' ... done')
 
     def build(self, buildDirectory):
         """
@@ -102,7 +111,8 @@ class Schema(object):
         :param buildDirectory: the directory where the schema must be build
         :return: None
         """
-        print '  Building Schema ... '
+        if self.verbose:
+            print('  Building Schema ... ')
         self.__saveSchemaFile(buildDirectory)
         self.__buildSchemaRSTFile(buildDirectory)
         # TODO: activate pyschemaspy again

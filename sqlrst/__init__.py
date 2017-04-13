@@ -28,3 +28,4 @@ def sqlRstFile2RstFile(inputFile, outputFile):
     :param outputFile: the rst file.
     """
     filehelpers.generateFile(inputFile, outputFile, sqlRst2Rst)
+

@@ -79,10 +79,14 @@ def sqlRstToBlockSequence(sqlText):
             return(
                 structure.CreateViewStatementBlock(text, name=m.group('name'))
             )
-        m = re.match(SELECT_RE+'.*', text,  re.IGNORECASE)
+        m = re.match(SELECT_RE+' *(/\*: *(?P<name>[\w\.]+) *\*/)?.*', text,  re.IGNORECASE)
         if m:
+            if m.group('name') is None:
+                name = None
+            else:
+                name = m.group('name')
             return(
-                structure.SelectStatementBlock(text)
+                structure.SelectStatementBlock(text, name=name)
             )
         return structure.UnknownStatementBlock(text)
 
