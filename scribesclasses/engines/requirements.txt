@@ -1,0 +1,4 @@
+pygithub        # module github for githubbot
+sphinx          # for onweb
+#               # changecontrol
+# SphinxZone    # module sphinxproblems for onweb

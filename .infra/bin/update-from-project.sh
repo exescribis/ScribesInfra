@@ -20,12 +20,12 @@ function updateItem {
     if [ -d "${sourceitem?}" ]
     then
         echo "    updating directory ${item?}/ from ${project?}"
-#        rm -rf ${targetitem?}
-#        cp -r ${sourceitem?} ${targetitem?}
+        rm -rf ${targetitem?}
+        cp -r ${sourceitem?} ${targetitem?}
     elif [ -f "${sourceitem?}" ]
     then
         echo "    updating file ${item?} from ${project?}"
-        # cp ${sourceitem?} ${targetitem?}
+        cp ${sourceitem?} ${targetitem?}
     else
         echo "**ERROR** ${sourceitem?} does not exist!" > /dev/stderr
     fi

@@ -1,0 +1,2 @@
+# pywildcard   # for changecontrol.changespec  # local copy unchanged
+# termcolor    # for changecontrol.comparaison # local copy unchanged
