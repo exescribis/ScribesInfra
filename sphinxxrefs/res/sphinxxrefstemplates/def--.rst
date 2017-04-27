@@ -1,3 +1,0 @@
-
-    {label}
-        .. todo:: define {label}
