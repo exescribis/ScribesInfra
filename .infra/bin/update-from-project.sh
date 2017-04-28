@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+#
+# Copy items (dirs or files) from registered projects
+# into the ScribesInfra directory and then publish
+# it on GitHub
+#
+# Projects are registred in .infra/projects.txt
+# Each projects contains a .scribesinfra file containing
+# the list of items
+#
+
 ROOT=~/DEV
 SCRIBESINFRA=${ROOT?}/ScribesZone/ScribesInfra
 
