@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ROOT=~/DEV
-SCRIBESINFRA=${ROOT?}/ScribesZone/ScribesInfra/
+SCRIBESINFRA=${ROOT?}/ScribesZone/ScribesInfra
 
 function updateItem {
     # update a directory or file in ScribesInfra
