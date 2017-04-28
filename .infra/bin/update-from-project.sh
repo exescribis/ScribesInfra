@@ -26,6 +26,8 @@ function updateItem {
     elif [ -f "${sourceitem?}" ]
     then
         echo "    copying file ${item?} from ${project?}"
+        targetparent=`dirname ${targetitem}`
+        mkdir -p ${targetparent}
         cp ${sourceitem?} ${targetitem?}
     else
         echo "**ERROR** ${sourceitem?} does not exist!" > /dev/stderr
