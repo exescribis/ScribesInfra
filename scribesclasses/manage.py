@@ -56,6 +56,8 @@ def main():
     execute(sys.argv[1:])
 
 if __name__ == "__main__":
+    print "called from command line"
+    exit
     for cmd in [
             #'eval --help',  # help will exit as its normal behavior
             'eval stoto',
