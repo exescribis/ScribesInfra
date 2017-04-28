@@ -63,7 +63,7 @@ function publish {
     project=${1?}
     echo "publishing ${project?}"
     git -C ${SCRIBESINFRA?} add .
-    git -C ${SCRIBESINFRA?} commit -am 'update ${project?}'
+    git -C ${SCRIBESINFRA?} commit -am "update ${project?}"
     git -C ${SCRIBESINFRA?} push origin master
 }
 
