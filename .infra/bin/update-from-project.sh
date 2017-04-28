@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-SCRIBESINFRA=~/DEV/ScribesZone/ScribesInfra/
+ROOT=~/DEV
+SCRIBESINFRA=${ROOT?}/ScribesZone/ScribesInfra/
 
 function updateItem {
     # update a directory or file in ScribesInfra
@@ -9,13 +10,13 @@ function updateItem {
     #
     # e.g.
     #
-    #   updateItem SphinxZone sphinxdata
-    #   updateItem SphinxZone sphinxdata
+    #   updateItem ScribesZone/SphinxZone sphinxdata
+    #   updateItem PythonZone/SphinxZone sphinxdata
     #
 
     project=${1?}
     item=${2?}
-    sourceitem=$SCRIBESINFRA/../${project?}/${item?}
+    sourceitem=${ROOT?}/${project?}/${item?}
     targetitem=${SCRIBESINFRA?}/${item?}
     if [ -d "${sourceitem?}" ]
     then
@@ -37,7 +38,7 @@ function updateProjectItems {
     # updateProjectItems <project>
     project=${1?}
     echo "updating ${project?}"
-    projectdir=$SCRIBESINFRA/../${project?}
+    projectdir=${ROOT?}/${project?}
     projectfilespec=${projectdir?}/.scribesinfra
     for item in `cat ${projectfilespec}`
     do

@@ -1,2 +1,3 @@
-SphinxZone
-ScribesClasses
+ScribesZone/SphinxZone
+ScribesZone/ScribesClasses
+PythonZone/PyUseOCL
