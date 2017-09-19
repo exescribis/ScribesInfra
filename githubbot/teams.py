@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import githubbot.users
-from githubbot import toNotSet
 
 def getTeam(orgName, teamName):
     """

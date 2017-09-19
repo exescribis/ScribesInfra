@@ -13,12 +13,12 @@ class ManageCommandSet(commandset.CommandSet):
         super(ManageCommandSet, self).__init__()
 
     def addCommonArguments(self):
-        self.commonArgumentParser.add_argument(
-            '-tg', '--testgroup',
-            nargs='?',
-            default=None,
-            const='00',
-            help='Key of the testing group. Default to "00".')
+        # self.commonArgumentParser.add_argument(
+        #     '-tg', '--testgroup',
+        #     nargs='?',
+        #     default=None,
+        #     const='00',
+        #     help='Key of the testing group. Default to "00".')
         self.commonArgumentParser.add_argument(
             '-u', '--user',
             default='scribesbot',
@@ -56,8 +56,8 @@ class ManageCommandSet(commandset.CommandSet):
                 sys.exit(2)
             else:
                 return scribesclasses.models.classrooms.Classroom(
-                    classRoomFile=parameters.classroomfile,
-                    testingKey=parameters.testgroup,
+                    classroomFile=parameters.classroomfile,
+                    # testingKey=parameters.testgroup,
                     defaultAccountInfo=parameters.user
                 )
 

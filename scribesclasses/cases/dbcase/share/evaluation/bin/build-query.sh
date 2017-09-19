@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This file is not intended to be called from command line.
+# It is called from build.py
+#
 # Evaluate one or more query for one or more groups for a given case study.
 #
 # For the usage see the function usage to type "build-query.sh"
@@ -23,17 +26,24 @@
 # TODO: improve verbose display for failure
 #       display the error (and the actual query).qu
 #
-SCRIBES_INFRA=../ScribesInfra
-PYTHON=${SCRIBES_INFRA?}/ScribesSmallEnv/bin/python
+
+
+#echo "==============================================="
+#echo PY_PATH=$PY_PATH
+#echo PY_BIN=$PY_BIN
+#echo "==============================================="
+
+if [ "$PY_PATH" == "" ]
+then
+    echo 'env variables $PY_PATH and $PY_BIN must be set' >/dev/stderr
+    exit 2
+fi
+
 OUTEXTENSION=csv
 
 
-
 function usage {
-    echo "Usage"
-    echo "-----"
-    echo
-    echo "usage:"
+    echo "NOT TO BE CALLED DIRECTLY:"
     echo "    build-query.sh <case> <group> <query> [-v]"
     echo
     echo "where"
@@ -104,7 +114,7 @@ function buildQueryRSTFile {
 
     # build the query file
     QUERY_RST_FILE=${RST_DIR?}/$QUERY_NAME.generated.rst
-    PYTHONPATH=${SCRIBES_INFRA?} $PYTHON -m sqlrst ${SQL_QUERY_FILE} $QUERY_RST_FILE
+    PYTHONPATH=${PY_PATH?} ${PY_BIN?} -m sqlrst ${SQL_QUERY_FILE} $QUERY_RST_FILE
 
     # echo "--------------- ${SQL_ERRORS_FILE?}"
     if [ -s ${SQL_ERRORS_FILE?} ]

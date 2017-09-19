@@ -10,9 +10,9 @@ class ClassroomEvalEngine(object):
         self.classroom = classroom
 
     def build(self, arguments):
-        self.hqDirectory = self.classroom.localHQRepoDirectory()
+        self.hqDirectory = self.classroom.hq.dir
         this_dir=os.path.dirname(os.path.realpath(__file__))
         script=os.path.join(this_dir,'res','bin','eval.sh')
         command=script+' '+self.hqDirectory+' '+' '.join(arguments)
-        print command
+        print(command)
         os.system(command)

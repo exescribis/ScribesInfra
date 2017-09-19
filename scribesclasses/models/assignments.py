@@ -10,9 +10,9 @@ class Assignment(object):
         self.assignmentPath = assignmentPath
         self.assignmentName = os.path.basename(assignmentPath)
         self.assignmentDirectory = os.path.join(
-                classroom.localHQRepoPath(os.path.dirname(assignmentPath)),
+                classroom.hq.path(os.path.dirname(assignmentPath)),
                 '.assignments', self.assignmentName)
-        print self.assignmentDirectory
+        print(self.assignmentDirectory)
         assert(os.path.isdir(self.assignmentDirectory))
         self.workName = self.assignmentName
         self.workDirectory = self.assignmentDirectory
@@ -20,9 +20,9 @@ class Assignment(object):
         self.work = works.Work(
                 self.workDirectory,
                 self.classroom.org(),
-                self.classroom.rootRepoName(),
+                self.classroom.root.name,
                 self.classroom.groupList.keys(),
-                self.classroom.groupRepoNamePattern())
+                self.classroom.groupList.factory.repoName())
 
     def showWork(self):
         self.work.show()

@@ -57,11 +57,11 @@ class ClassroomAssignmentEngine(object):
 
     def build(self, arguments=()):
         assignment_status_file = os.path.join(
-            self.classroom.localHQRepoDirectory(),
+            self.classroom.hq.dir,
             'assignments.json')
         if not os.path.isfile(assignment_status_file):
-            print 'WARNING: no status file found. %s' % assignment_status_file
-            print '         Assuming that no assignements are to be processed'
+            print( 'WARNING: no status file found. %s' % assignment_status_file)
+            print('         Assuming that no assignements are to be processed')
         else:
             assignments = githubbot.load_json(assignment_status_file)
             assignments_by_status = {}
@@ -69,10 +69,10 @@ class ClassroomAssignmentEngine(object):
                 if a_status not in assignments_by_status:
                     assignments_by_status[a_status] = []
                 assignments_by_status[a_status].append(a_name)
-                print "=======  Assignment",a_name,a_status
+                print("=======  Assignment",a_name,a_status)
                 if a_status == "CREATE":
                     a = self._assignment(a_name)
                     a.publishWork()
-            print ', '.join(
+            print(', '.join(
                     '%d "%s"' % (len(assignments),status)
-                    for (status,assignments) in assignments_by_status.iteritems())
+                    for (status,assignments) in assignments_by_status.iteritems()))

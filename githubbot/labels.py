@@ -1,8 +1,15 @@
 # coding: utf-8
+from __future__ import print_function
+from typing import List, Text, Tuple, Optional
 
 from github import UnknownObjectException
+import github.Repository
+import github.Label
 
 import repositories
+
+NameAndColor=Tuple[Text, Text]
+GH_Repository=github.Repository.Repository
 
 
 def label(username='',reponame='',labelname=None):
@@ -31,46 +38,70 @@ STD_LABEL_NAMES = {
     'wontfix'
 }
 
-def deleteStandardLabels(repo):
-    for label in repo.get_labels():
-        if label.name in STD_LABEL_NAMES:
-            print '  deleting standard label (%s,%s)' % (label.name, label.color)
-            label.delete()
+def deleteStandardLabels(gh_repo, prefix='  '):
+    #type: (GH_Repository, Optional[Text]) -> None
+    for gh_label in gh_repo.get_labels():
+        if gh_label.name in STD_LABEL_NAMES:
+            if prefix is not None:
+                print(prefix+'Deleting standard label (%s,%s)'
+                      % (gh_label.name, gh_label.color))
+            gh_label.delete()
 
-def deleteAllLabels(repo, code):
+def deleteAllLabels(gh_repo, code, prefix='  '):
+    #type: (GH_Repository, int, Optional[Text]) -> None
     if code == 666:
-        print 'Removing existing labelsSpec from ' % repo.name
-        for label in repo.get_labels():
-            print '  deleting (%s,%s)' % (label.name, label.color)
-            label.delete()
+        if prefix is not None:
+            print(prefix +'Removing existing labelsSpec from '
+                  % gh_repo.name)
+        for gh_label in gh_repo.get_labels():
+            if prefix is not None:
+                print(prefix+'  deleting (%s,%s)'
+                      % (gh_label.name, gh_label.color))
+            gh_label.delete()
 
-def defineAllLabels(repo, namesAndColors, deleteExistingLabels=True):
+def defineAllLabels(
+        gh_repo,
+        namesAndColors,
+        deleteExistingLabels=True,
+        prefix='  '):
+    #type: (GH_Repository, List[NameAndColor], bool, Optional[Text]) -> None
     if deleteExistingLabels:
-        deleteAllLabels(repo, 666)
-    print 'Adding labelsSpec'
+        deleteAllLabels(gh_repo, 666)
+    print(prefix+'Adding labelsSpec')
     for (name, color) in namesAndColors:
-        print '  creating (%s,%s)' % (name, color)
-        repo.create_label(name, color)
+        if prefix is not None:
+            print(prefix+'Creating (%s,%s)' % (name, color))
+        gh_repo.create_label(name, color)
 
 
-def ensureLabel(repo, name, color):
+def ensureLabel(gh_repo, name, color, prefix='  '):
+    #type: (GH_Repository, Text, Text, Optional[Text]) -> github.Label.Label
     try:
-        label = repo.get_label(name)
+        gh_label = gh_repo.get_label(name)
     except UnknownObjectException as e:
-        label = None
+        gh_label = None
 
-    if label is None:
+    if gh_label is None:
         # no such label name
-        print 'Creating label (%s,%s) in repo %s ... ' % (name, color, repo.name),
-        label = repo.create_label(name, color)
+        if prefix is not None:
+            print(
+                prefix+'Creating label (%s,%s) in repo %s'
+                % (name, color, gh_repo.name))
+        gh_label = gh_repo.create_label(name, color)
     else:
-        print 'Editing label (%s,%s) in repo %s ... ' % (name, color, repo.name),
-        label.edit(name, color)
-    print 'done'
-    return label
+        if prefix is not None:
+            print(prefix +'Editing label (%s,%s) in repo %s ... '
+                  % (name, color, gh_repo.name))
+        gh_label.edit(name, color)
+    return gh_label
 
-def ensureAllLabels(repo, namesAndColors, deleteStandardLabelsBefore):
+
+def ensureAllLabels(
+        gh_repo,
+        namesAndColors,
+        deleteStandardLabelsBefore):
+    #type: (GH_Repository, List[NameAndColor], bool) -> None
     if deleteStandardLabelsBefore:
-        deleteStandardLabels(repo)
+        deleteStandardLabels(gh_repo)
     for (name,color) in namesAndColors:
-        ensureLabel(repo, name, color)
+        ensureLabel(gh_repo, name, color)

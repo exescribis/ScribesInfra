@@ -23,7 +23,7 @@ def runCommand(
         command = commandPattern.format(key=key)
         directory = os.getcwd()
         if verbose:
-            print '>>> %s     from %s' % (command,directory)
+            print('>>> %s     from %s' % (command,directory))
 
         if fake:
             code = 0
@@ -75,10 +75,7 @@ def ensure_empty_dir(directory):
     else:
         ensure_dir(directory)
 
-import json
 
-def load_json(filename):
-    return json.loads(open(filename).read())
 
 def nameFilter(regexpr=None):
     if regexpr is None:

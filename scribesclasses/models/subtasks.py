@@ -192,16 +192,16 @@ class WorkSubtasksProgress(object):
             # Checking that the subtask ids are the same as before,
             # All work items must have the same tasks
             if workItemSubtasks.subtaskIds != self.__subtaskIds:
-                print 'ERROR: the tasks ids for group %s do not match' % workItemSubtasks.groupKey
-                print '   found  : %s' % str(workItemSubtasks.subtaskIds)
-                print '   before : %s' % str( self.__subtaskIds)
+                print('ERROR: the tasks ids for group %s do not match' % workItemSubtasks.groupKey)
+                print('   found  : %s' % str(workItemSubtasks.subtaskIds))
+                print('   before : %s' % str( self.__subtaskIds))
                 assert (workItemSubtasks.subtaskIds == self.__subtaskIds)
             # Checking that the title are the same as before
             if  workItemSubtasks.subtaskTitles != self.__subtaskTitles:
-                print 'ERROR: the subtasksTitles for group %s no not match' \
-                      % workItemSubtasks.subtaskTitles
-                print '   found  : %s' % str(workItemSubtasks.subtaskTitles)
-                print '   before : %s' % str( self.__subtaskTitles)
+                print('ERROR: the subtasksTitles for group %s no not match'
+                      % workItemSubtasks.subtaskTitles)
+                print('   found  : %s' % str(workItemSubtasks.subtaskTitles))
+                print('   before : %s' % str( self.__subtaskTitles))
                 assert(workItemSubtasks.subtaskTitles == self.__subtaskTitles)
         self.__groupKeyToWorkItemSubtasks[workItemSubtasks.groupKey] \
             = workItemSubtasks

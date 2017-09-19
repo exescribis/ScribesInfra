@@ -1,5 +1,5 @@
 # coding: utf-8
-
+from __future__ import print_function
 import users
 import githubbot
 import refs
@@ -22,14 +22,21 @@ def repo(username="", reponame=""):
 def setRepo(username="", reponame=""):
     r = repo(username,reponame)
     githubbot._repo_ = r
-    print 'Default repository set to %s ' % refs.ref(r)
+    print('Default repository set to %s ' % refs.ref(r))
 
 
 
 
-def ensureRepo(orgName, reponame,
-               description=None, private=None, has_issues=None,
-               has_wiki=None, has_downloads=None, doEnsureEmptyRepo=False):
+def ensureRepo(
+        orgName,
+        reponame,
+        description=None,
+        private=None,
+        has_issues=None,
+        has_wiki=None,
+        has_downloads=None,
+        doEnsureEmptyRepo=False,
+        prefix='  '):
     try:
         o = githubbot.users.org(orgName)
     except:
@@ -39,16 +46,24 @@ def ensureRepo(orgName, reponame,
     try:
         r = o.get_repo(reponame)
     except:
-        print 'Create repository %s/%s ... ' % (orgName, reponame),
+        if prefix is not None:
+            print(prefix+'Create repository %s/%s ... '
+                  % (orgName, reponame),
+                  end=''),
         r = o.create_repo(
                 reponame,
                 description=toNotSet(description),
                 private=toNotSet(private), has_issues=toNotSet(has_issues),
                 has_wiki=toNotSet(has_wiki), has_downloads=toNotSet(has_downloads))
-        print 'done'
+        if prefix is not None:
+            print(prefix+'done')
         return r
     else:
         if doEnsureEmptyRepo==666:
+            if prefix is not None:
+                print(prefix +'Delete repository %s/%s ... '
+                      % (orgName, reponame),
+                        end='')
             r.delete()
             r = o.create_repo(
                 reponame,
@@ -56,9 +71,17 @@ def ensureRepo(orgName, reponame,
                 private=toNotSet(private), has_issues=toNotSet(has_issues),
                 has_wiki=toNotSet(has_wiki), has_downloads=toNotSet(has_downloads))
         else:
+            if prefix is not None:
+                print(prefix+'Edit repository %s/%s ... '
+                      % (orgName, reponame),
+                      end='')
             r.edit(reponame,
                 description=toNotSet(description),
-                private=toNotSet(private), has_issues=toNotSet(has_issues),
-                has_wiki=toNotSet(has_wiki), has_downloads=toNotSet(has_downloads))
+                private=toNotSet(private),
+                has_issues=toNotSet(has_issues),
+                has_wiki=toNotSet(has_wiki),
+                has_downloads=toNotSet(has_downloads))
+            if prefix is not None:
+                print('done')
         return r
 

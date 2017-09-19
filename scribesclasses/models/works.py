@@ -1,15 +1,14 @@
 # coding: utf-8
-
+from __future__ import print_function
 import os
 import re
 from string import center
 
-import collections
 import githubbot.issues
 import githubbot.labels
 import githubbot.logicalissues
 import githubbot.urls
-from githubbot import file_content, load_json
+from scribesclasses import file_content, load_json
 import scribesclasses.models.subtasks
 
 WORK_DEFINITION_LABEL_INFO  = ('WorkDefinition','fbca04')
@@ -156,7 +155,7 @@ class Work(object):
 
         """
         if verbose:
-            print 'Loading work from: %s' % workDirectory
+            print('Loading work from: %s' % workDirectory)
 
         #----- save parameters ----------------------------------------------
         self.verbose = verbose
@@ -246,16 +245,16 @@ class Work(object):
                         definitionIssueRef=None,
                         preview=True))
 
-        self.hasBeenBoundWithGitHub = False             # does bind() has been executed?
-        self.hasDefinitionBeenSavedToGitHub = False     # does the work has been saved?
-        self.hasDefinitionLabelsBeenSavedToGitHub = False
-        self.hasItemsBeenSavedToGitHub = False
-        self.hasItemsLabelsBeenSavedToGitHub = False
+        self.hasBeenBoundWithGH = False             # does bind() has been executed?
+        self.hasDefinitionBeenSavedToGH = False     # does the work has been saved?
+        self.hasDefinitionLabelsBeenSavedToGH = False
+        self.hasItemsBeenSavedToGH = False
+        self.hasItemsLabelsBeenSavedToGH = False
 
         self.__WorkSubtasksProgress = None              # managed by WorkSubtasksProgress
 
         if self.verbose:
-            print 'work specification loaded from: %s' % workDirectory
+            print('work specification loaded from: %s' % workDirectory)
 
 
 
@@ -291,19 +290,19 @@ class Work(object):
         if (os.path.isfile(self.issuesFile)):
             lines = file_content(self.issuesFile).split('\n')
             self.definitionIssueId = lines[0].strip()
-            # print 'Definition issue found: %s' % self.definitionIssueId
+            # print('Definition issue found: %s' % self.definitionIssueId
             self.itemIssueIdMap = {}
             for line in lines[1:]:
                 _ = line.strip()
-                if _ <> '':
+                if _ != '':
                     fields = line.strip().split('|')
                     key = fields[0]
                     id = fields[1]
                     self.itemIssueIdMap[key]=id
-                    # print 'Item "%s" issue found: %s' % (key,id)
+                    # print('Item "%s" issue found: %s' % (key,id)
             return True  # the work is existing
         else:
-            # print 'No existing issues found'
+            # print('No existing issues found'
             self.definitionIssueId = None
             self.itemIssueIdMap = {}
             return False  # the work is not existing
@@ -325,8 +324,6 @@ class Work(object):
 
     def __get_def_substitutions(self):
         """ Internal method used below
-        :param issueRef: this value will be defined only when the issue is saved
-        :param preview: if this is a preview, do not generate an exception if issueRef is None
         :return: dict
         """
         return {
@@ -391,8 +388,8 @@ class Work(object):
         try:
             return text.format(**substitutions)
         except:
-            print '>>> ERROR %s: substitution failed for the following text.' % label
-            print text
+            print('>>> ERROR %s: substitution failed for the following text.' % label)
+            print(text)
             raise
 
     #----
@@ -410,7 +407,7 @@ class Work(object):
 
     @staticmethod
     def __checkMatch(kind, issueFile, value1, value2):
-        if value1 <> value2:
+        if value1 != value2:
             raise Exception(
                     '%s: item %s does not match: %s<>%s' % (
                         issueFile, kind, value1, value2))
@@ -423,7 +420,7 @@ class Work(object):
         """
 
         if self.verbose:
-            print 'Binding work to GitHub: %s' % self.workDirectory
+            print('Binding work to GitHub: %s' % self.workDirectory)
 
         self.__bindDefinition()
 
@@ -441,7 +438,7 @@ class Work(object):
         self.allItemKeys = sorted(set(self.itemKeys) | set (self.itemIssueIdMap.keys()))
         self.oldItemKeys = sorted(set(self.itemIssueIdMap.keys()) - set(self.itemKeys))
         self.newItemKeys = sorted(set(self.itemKeys) - set(self.itemIssueIdMap.keys()))
-        # print 'Items keys -- total: %i,  new: %i,  old: %i' % (
+        # print('Items keys -- total: %i,  new: %i,  old: %i' % (
         #    len(self.allItemKeys), len(self.newItemKeys), len(self.oldItemKeys))
 
         self.__bindOldItems()
@@ -454,8 +451,8 @@ class Work(object):
             # TODO: check if the issue should be check as well
             n = int(ns)
         if self.verbose:
-            print 'work bound successfully'
-        self.hasBeenBoundWithGitHub = True
+            print('work bound successfully')
+        self.hasBeenBoundWithGH = True
 
 
     def __bindDefinition(self):
@@ -474,11 +471,11 @@ class Work(object):
             Work.__checkMatch('organization',self.issuesFile,self.definitionRepoName,r)
             self.definitionIssueNumber = int(ns)
         if self.verbose:
-            print 'Initializing WD logical issue for %s/%s: "%s" -> ' % (
+            print('Initializing WD logical issue for %s/%s: "%s" -> ' % (
                 self.orgName,
                 self.definitionRepoName,
                 self.definitionTitlePattern
-            ),
+            )),
         self.definitionLogicalIssue = githubbot.logicalissues.LogicalIssue(
                 orgName=self.orgName,
                 repoName=self.definitionRepoName,
@@ -488,7 +485,7 @@ class Work(object):
         )
         n = self.definitionLogicalIssue.issueNumber
         if self.verbose:
-            print 'issue #%s' % ('NOT SAVED YET' if n is None else n)
+            print('issue #%s' % ('NOT SAVED YET' if n is None else n))
 
     def __bindAllItems(self):
         for key in self.allItemKeys:
@@ -512,12 +509,14 @@ class Work(object):
                 issue_number = None
             # create the logical issue
             if self.verbose:
-                print 'Initializing WI logical issue for %s/%s: "%s" -> ' % (org,repo,title),
+                print('Initializing WI logical issue for %s/%s: "%s" -> ' % (org,repo,title), end='')
             li = githubbot.logicalissues.LogicalIssue(
                     org, repo, title, body, issueNumber=issue_number
             )
             if self.verbose:
-                print 'issue #%s' % ('NOT SAVED YET' if li.issueNumber is None else li.issueNumber)
+                print('issue #%s' % (
+                    'NOT SAVED YET' if li.issueNumber is None 
+                    else li.issueNumber))
             # Only logical issues in this map are saved.
             self.itemLogicalIssueMap[key] = li
 
@@ -526,7 +525,7 @@ class Work(object):
             self.__bindOldItem(key)
 
     def __bindOldItem(self, key):
-        print "Warning: the key '%s' is in .issues but not in list. Keep it anyway." % key
+        print("Warning: the key '%s' is in .issues but not in list. Keep it anyway." % key)
 
 
     #---- saving to github --------------------------------------------------------------
@@ -538,11 +537,11 @@ class Work(object):
         Save the definition and associate corresponding labels.
         This method set self.definitionIssueId
         """
-        if not self.hasBeenBoundWithGitHub:
+        if not self.hasBeenBoundWithGH:
             self.bind()
 
         if self.verbose:
-            print '----- Saving definition ---------------------------'
+            print('----- Saving definition ---------------------------')
         # save the definition issue
         self.definitionLogicalIssue.save(self._getSubstitutionsForDefinition())
         self.definitionIssueId = self.definitionLogicalIssue.id()
@@ -556,16 +555,16 @@ class Work(object):
             self.definitionLogicalIssue.repo,
             self.definitionLogicalIssue.issue,
             all_labels)
-        self.hasDefinitionBeenSavedToGitHub = True
+        self.hasDefinitionBeenSavedToGH = True
         # TODO: implement milestone here
 
     def __saveItems(self):
         if self.verbose:
-            print '----- Saving items     ---------------------------'
+            print('----- Saving items     ---------------------------')
         for (key, logical_issue) in sorted(self.itemLogicalIssueMap.items()):
             self.__saveItem(key, logical_issue)
-        self.hasItemsLabelsBeenSavedToGitHub = True
-        self.hasItemsBeenSavedToGitHub = True  # FIXME
+        self.hasItemsLabelsBeenSavedToGH = True
+        self.hasItemsBeenSavedToGH = True  # FIXME
 
     def __saveItem(self, key, logical_issue):
         # save the item issue
@@ -598,6 +597,8 @@ class Work(object):
         """
         labels = []
         # save all labelsSpec to make sure they are defined on the repo
+
+        # noinspection PyCompatibility
         for (name,color) in labelInfos.iteritems():
             labels.append(githubbot.labels.ensureLabel(repo, name, color))
         # associate all labelsSpec with the issue
@@ -607,13 +608,12 @@ class Work(object):
 
     def save(self, definitionOnly=False):
         if self.verbose:
-            print center(' SAVING WORK ', 80, '=')
+            print(center(' SAVING WORK ', 80, '='))
         self.__saveDefinition()
         if not definitionOnly:
             self.__saveItems()
         if self.verbose:
-            print center(' WORK SAVED ', 80, '=')
-
+            print(center(' WORK SAVED ', 80, '='))
 
     # ---- show --------------------------------------------------------------
 
@@ -626,21 +626,21 @@ class Work(object):
         """
         if self.__WorkSubtasksProgress is not None and not forceUpdate:
             return self.__WorkSubtasksProgress
-        if (not self.hasBeenBoundWithGitHub):
+        if (not self.hasBeenBoundWithGH):
             self.bind()
         wp = scribesclasses.models.subtasks.WorkSubtasksProgress()
         for (key, logical_issue) in self.itemLogicalIssueMap.items():
-            # print "Processing key '%s'" % key,
+            # print("Processing key '%s'" % key,
             issue = logical_issue.getIssue()
             wist = scribesclasses.models.subtasks.WorkItemSubtasksProgress(
                 groupKey=key,
                 text=issue.body,
                 workItemClosed=(issue.state=='closed')
             )
-            # print issue.body
-            # print wist.subtaskIds
+            # print(issue.body
+            # print(wist.subtaskIds
             wp.add(wist)
-            # print issue.state, wp.groupKeys
+            # print(issue.state, wp.groupKeys
         self.__WorkSubtasksProgress = wp
         if publishProgress:
             updateWorkProgressComment(
@@ -660,51 +660,51 @@ class Work(object):
         self.showIssues(width=width, verbose=verbose)
 
     def showSpec(self, width=80, verbose=False, cut=-50):
-        print center(self.workName, width, '=')
-        print '    workDirectory:     ... %s' % self.workDirectory[cut:]
-        print '    workName:          ... %s' % self.workName[cut:]
-        print '    textFile:          ... %s' % self.textFile[cut:]
-        print '    infoFile:          ... %s' % self.infoFile[cut:]
-        print '    issuesFile:        ... %s' % self.issuesFile[cut:]
+        print(center(self.workName, width, '='))
+        print('    workDirectory:     ... %s' % self.workDirectory[cut:])
+        print('    workName:          ... %s' % self.workName[cut:])
+        print('    textFile:          ... %s' % self.textFile[cut:])
+        print('    infoFile:          ... %s' % self.infoFile[cut:])
+        print('    issuesFile:        ... %s' % self.issuesFile[cut:])
 
     def showStatus(self, width=80,verbose=False):
-        print center('status', width, '=')
-        print '    isExistingWork:                  %s' % self.isExistingWork
-        print '    hasBeenBoundWithGitHub:          %s' % self.hasBeenBoundWithGitHub
-        print '    hasDefinitionBeenSavedToGitHub:  %s' % self.hasDefinitionBeenSavedToGitHub
-        print '    hasItemsBeensavedToGitHub:       %s' % self.hasItemsBeenSavedToGitHub
+        print(center('status', width, '='))
+        print('    isExistingWork:                  %s' % self.isExistingWork)
+        print('    hasBeenBoundWithGH:          %s' % self.hasBeenBoundWithGH)
+        print('    hasDefinitionBeenSavedToGH:  %s' % self.hasDefinitionBeenSavedToGH)
+        print('    hasItemsBeensavedToGH:       %s' % self.hasItemsBeenSavedToGH)
 
     def showDefinition(self, width=80, verbose=False):
-        print center('DEFINITION', width, '-')
-        print '    '+self.definitionTitlePattern[:width]
-        print '    '+'.'*width
-        print '    '+self.definitionBodyPattern[:width]
+        print(center('DEFINITION', width, '-'))
+        print('    '+self.definitionTitlePattern[:width])
+        print('    '+'.'*width)
+        print('    '+self.definitionBodyPattern[:width])
 
     def showItems(self, width=80, verbose=False):
-        print center('ITEM', width, '-')
-        print '    '+self.itemBodyPattern[:width]
+        print(center('ITEM', width, '-'))
+        print('    '+self.itemBodyPattern[:width])
 
     def showIssues(self, width=80, verbose=False):
-        print center('DEFINITION ISSUE',width, '-')
+        print(center('DEFINITION ISSUE',width, '-'))
         if self.definitionIssueId is None:
-            print 'NO DEFINITION ISSUE YET. definitionIssueId is None'
+            print('NO DEFINITION ISSUE YET. definitionIssueId is None')
         elif self.definitionLogicalIssue is None:
             # TODO: Check why this is necessary
             # sometimes it goes through there but not sure if this is ok
-            print 'NO DEFINITION ISSUE YET. definitionLogicalIssue is None'
+            print('NO DEFINITION ISSUE YET. definitionLogicalIssue is None')
         else:
-            print self.definitionLogicalIssue.url()
+            print(self.definitionLogicalIssue.url())
 
-        print center('ITEM ISSUES',width, '-')
-        print '    New Item Keys: %s' % ', '.join(self.newItemKeys)
-        print '    Old Item Keys: %s' % ', '.join(self.oldItemKeys)
-        print '    All Item Keys: %s' % ', '.join(self.allItemKeys)
-        print
+        print(center('ITEM ISSUES',width, '-'))
+        print('    New Item Keys: %s' % ', '.join(self.newItemKeys))
+        print('    Old Item Keys: %s' % ', '.join(self.oldItemKeys))
+        print('    All Item Keys: %s' % ', '.join(self.allItemKeys))
+        print()
         for (key, logical_issue) in sorted(self.itemLogicalIssueMap.items()):
             if logical_issue.issueNumber is None:
-                print '%s -> ****NOT_SAVED****' % key
+                print('%s -> ****NOT_SAVED****' % key)
             else:
-                print '%s -> %s' % (key, logical_issue.url())
+                print('%s -> %s' % (key, logical_issue.url()))
 
 
 

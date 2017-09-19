@@ -1,13 +1,25 @@
+from __future__ import print_function
 import commandset
 
 import githubbot.accounts
-import scribesclasses.engines.github
+import scribesclasses.engines.github.classrooms
 
-class GitHubCommand(commandset.Command):
+D="""
+This command reads a classroom.json file and create/edit/delete
+the corresponding github artefacts.
+"github ensure" will make sure that github entities exist.
+"github delete" will delete github entities. Use with CAUTION!
+
+The entites are:
+- a "root" repository
+- a "group" repository for each group of student
+- a "team" for each group
+- labels and milestones that should go into each repository
+"""
+class GHCommand(commandset.Command):
     name =          'github'
     help =          'update the github representation of a classroom'
-    description =   '"github ensure" will make sure that github repositories exist.\n' \
-                    '"github delete" will delete github representation. Use with CAUTION!'
+    description =   D
 
 
     def addArguments(self):
@@ -20,17 +32,34 @@ class GitHubCommand(commandset.Command):
 
         # TODO: add a parameter to ensure labelsSpec/milestones
 
-    def do(self, parameters):
+    def do(self, parameters, prefix=''):
         course = parameters.classroom.course
+        if prefix is not None:
+            print(
+                (prefix+'Login to github as %s\n'
+                'Make sure that %s "owner" of the organization')
+                % (parameters.user, parameters.user) )
         githubbot.accounts.gitHubSession(parameters.user)
-        engine = scribesclasses.engines.github.ClassroomOnGitHubEngine(parameters.classroom)
+        engine = scribesclasses.engines.github.classrooms.ClassroomOnGHEngine(
+            parameters.classroom)
         if parameters.subcommand == 'ensure':
-            print("Ensuring that all github items are available for course %s" % course)
+            if prefix is not None:
+                print(
+                    prefix+"Ensuring that repos/[teams]/[labels]/[milestones]"
+                    "are on github for %s"
+                    % course)
             # TODO: add the ensureLabels / ensureMilestone   from parameers
-            engine.ensureAtGitHub(
-                ensureLabels=True,
-                ensureMilestones=True)
-            print("done")
+            engine.ensureAtGH(
+                repoIds=['groups'], # ('root', 'hq', 'info', 'web', 'groups'),
+                ensureLabels=False,
+                ensureMilestones=False,
+                ensureTeams=True,
+                readMembers=False)
+            if prefix is not None:
+                print("\n===> All github items are there.")
+                print('\n\nWHAT REMAIN TO BE DONE:')
+                print('- Populating the teams')
+                print('- Associating the teams with the group')
         elif parameters.subcommand == 'delete':
             print('You are about to DELETE ALL stuff on github for the course %s' % course)
             answer = raw_input('IS THIS REALLY WANT YOU WANT ? ARE YOU EVIL ?')
@@ -38,7 +67,7 @@ class GitHubCommand(commandset.Command):
                 print("Deletion cancelled")
             else:
                 # FIXME: this currently raise an exception
-                #       github.py, line 53, in deleteGroupAtGitHub
+                #       github.py, line 53, in deleteGroupAtGH
                 #       group.ghRepo.delete()
                 #       AttributeError: 'NoneType' object has no attribute 'delete'
                 #
@@ -46,5 +75,5 @@ class GitHubCommand(commandset.Command):
                 # This works with the test, but not here because ensure is not executed before
                 # This should be fixed.
                 print("Deleting all github items for course %s " % course)
-                engine.deleteAtGitHub(666)
+                engine.deleteAtGH(666)
                 print("done")

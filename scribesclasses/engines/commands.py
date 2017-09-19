@@ -19,7 +19,7 @@ class ClassroomCommandsEngine(object):
     The scripts can be either defined in files or as piece of text passed as parameter.
     'System' templates are defined in the ``scribesclass/res/commands`` directory
     but a user ``.commands`` directory can be specified.
-    The `buildScript` method build a script and save it in the ``localHQBuildCommandsDirectory``
+    The `buildScript` method build a script and save it in the ``hq.localBuildDirectory``
     of the headquarters.
     """
 
@@ -34,10 +34,10 @@ class ClassroomCommandsEngine(object):
                 'commands')
 
         #: Source directory for the classroom
-        self.classroomSourceDirectory = classroom.localHQSourceCommandsDirectory()
+        self.classroomSourceDirectory = classroom.hq.sourceCommandsDir
 
         #: Sarget directory for the classroom
-        self.classroomBuildDirectory = classroom.localHQBuildCommandsDirectory()
+        self.classroomBuildDirectory = classroom.hq.buildDir
 
 
     def scriptTemplate(self, filename):
@@ -133,12 +133,12 @@ class ClassroomCommandsEngine(object):
             _ += text + '\n\n'
 
         if not save:
-            print _
+            print(_)
         else:
             githubbot.ensure_dir(self.classroomBuildDirectory)
             filename = os.path.join(self.classroomBuildDirectory,
                                     os.path.basename(scriptFile)).replace('.sh','-all.sh')
-            print 'Generating %s' % filename
+            print('Generating %s' % filename)
             with open(filename,'w') as f:
                 f.write(_)
 

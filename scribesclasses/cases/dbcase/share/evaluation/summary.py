@@ -20,11 +20,11 @@ def points(status):
     return POINTS[status]
 
 def caseBuildDir(classroom, case):
-    return classroom.localHQRepoPath(
+    return classroom.hq.path(
         os.path.join(case, '.build'))
 
 def queryNames(classroom, case):
-    expectedStatesDir = classroom.localHQRepoPath(os.path.join(case,'ExpectedStates'))
+    expectedStatesDir = classroom.hq.path(os.path.join(case,'ExpectedStates'))
     pattern=os.path.join(expectedStatesDir,'*_*.csv')
     return [
         os.path.splitext(os.path.basename(csvfile))[0]

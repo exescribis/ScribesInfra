@@ -24,38 +24,36 @@ class ClassroomOnWebEngine(object):
 
     def __init__(self, classroom):
         self.classroom = classroom
-        assert os.path.isdir(self.classroom.localWebGradePath()), \
-            'webengine: %s directory does not exist' % self.classroom.localWebGradePath()
+        dir=self.classroom.web.dir
+        assert os.path.isdir(dir), \
+            'webengine: %s directory does not exist' % dir
 
-    def _ensureEmptyGroupDirectory(self, key):
-        dir = self.classroom.localWebGroupPath(key)
+    def _ensureEmptyGroupDirectory(self, group):
+        dir = group.repo.webDir
         if not os.path.isdir(dir):
-            print 'Creating web group directory: %s' % dir
+            print('Creating web group directory: %s' % dir)
         githubbot.ensure_empty_dir(dir)
 
-    def _buildSphinxDocWithProblems(self, key):
-        source_dir = self.classroom.localGroupRepoDirectory(key=key)
-        target_dir = self.classroom.localWebGroupPath(key=key)
-        team_name = self.classroom.groupTeamNamePattern().format(key=key)
+    def _buildSphinxDocWithProblems(self, group):
         e = sphinxproblems.engine.SphinxProblemsEngine(
-                source_dir,
-                target_dir,
+                group.repo.dir,
+                group.repo.webDir,
                 clean=True,
-                configValues=[('project',team_name)] )#('author',team_name)])
+                configValues=[('project',group.team.name)] )#('author',team_name)])
         exit_code = e.build()
         if exit_code != 0:
-            print '***** ERROR with sphinx for group %s' % key
+            print('***** ERROR with sphinx for group %s' % group.name)
 
     def _generateHQDocs(self):
 
 
         def _generateHQDocsDir():
-            githubbot.ensure_empty_dir(self.classroom.localHQBuildDocsDirectory())
+            githubbot.ensure_empty_dir(self.classroom.hq.buildDocsDir)
 
         def _generateHQDocsConf():
             hq_docs_template_dir = os.path.join(RES_DIRECTORY, 'hq-docs-template')
             conf_template = os.path.join(hq_docs_template_dir, 'conf.py')
-            conf_target = os.path.join(self.classroom.localHQBuildDocsDirectory(),'conf.py')
+            conf_target = os.path.join(self.classroom.hq.buildDocsDir, 'conf.py')
             with open(conf_template, 'r') as f:
                 content=f.read()
             content = content.format(project=self.classroom.course)
@@ -63,14 +61,17 @@ class ClassroomOnWebEngine(object):
                 f.write(content)
 
         def _generateHQDocsIndex():
-            index_file = os.path.join(self.classroom.localHQBuildDocsDirectory(),'index.rst')
+            index_file = os.path.join(self.classroom.hq.buildDocsDir, 'index.rst')
             title = self.classroom.course
             lines = [ title, '='*len(title), '']
-            lines += [
-                '*   `%s <%s>`_' % (key, self.classroom.webGroupURL(key))
-                for key in self.classroom.groupList.keys()
-                if key != '00'
-            ]
+            for group in self.classroom.groupList:
+                lines.append(
+                    '*   `%s <%s>`_' % (
+                        group.key,
+                        self.classroom['web'].repoURL(group.repo)
+                    )
+
+                )
             with open(index_file, 'w') as f:
                 f.write('\n'.join(lines))
 
@@ -79,8 +80,8 @@ class ClassroomOnWebEngine(object):
             """
             Execute sphinx to generate html file for HQ documentation.
             """
-            source = self.classroom.localHQBuildDocsDirectory()
-            target = self.classroom.localWebHQPath()
+            source = self.classroom.hq.buildDocsDir
+            target = self.classroom.hq.repo.webDir
             arguments = [
                 '-T',
                 '-q',
@@ -107,20 +108,20 @@ class ClassroomOnWebEngine(object):
             'git -C {localwebrepodir} commit --quiet -a -m "add new sphinx build"',
             'git -C {localwebrepodir} push --quiet origin master'
         ]
-        dir = self.classroom.localWebRepoDirectory()
+        dir = self.classroom.web.dir
         for cmd_pattern in cmd_patterns:
             cmd = cmd_pattern.format(localwebrepodir=dir)
             exit_code = os.system(cmd)
             if exit_code != 0:
-                print '***** ERROR %s while executing:\n  %s' % (exit_code,cmd)
+                print('***** ERROR %s while executing:\n  %s' % (exit_code,cmd))
 
-    def generateGroupDocs(self, key):
-        self._ensureEmptyGroupDirectory(key=key)
-        self._buildSphinxDocWithProblems(key=key)
+    def generateGroupDocs(self, group):
+        self._ensureEmptyGroupDirectory(group)
+        self._buildSphinxDocWithProblems(group)
 
     def generateAllGroupDocs(self):
-        for key in self.classroom.groupList.keys():
-            self.generateGroupDocs(key)
+        for group in self.classroom.groupList:
+            self.generateGroupDocs(group)
 
     def generatedHQDocs(self):
         self._generateHQDocs()
@@ -131,7 +132,7 @@ class ClassroomOnWebEngine(object):
     def build(self):
         self.generateAllGroupDocs()
         self.generatedHQDocs()
-        self.publishDocs()
+        self.publishAllDocs()
 
 
 

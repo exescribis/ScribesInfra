@@ -41,11 +41,11 @@ class ClassroomChangeSpecEngine(object):
     def __init__(self, classroom, directory):
         self.classroom = classroom
         self.hq_changespec_file = \
-            self.classroom.localHQRepoPath(
+            self.classroom.hq.path(
                 os.path.join(directory,'.changespec'))
         self.directory = directory
         self.root_directory = \
-            self.classroom.localRootRepoPath(directory)
+            self.classroom.root.path(directory)
 
     def _groupDirectory(self, key=None):
         return self.classroom.localGroupRepoPath(

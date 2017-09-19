@@ -34,22 +34,25 @@ def getMilestone(repo, title):
             return m
     return None
 
-def ensureMilestone(repo, title,
-                    description = github.GithubObject.NotSet,
-                    state = github.GithubObject.NotSet,  # 'open' | closed
-                    dueOn = github.GithubObject.NotSet):
+def ensureMilestone(repo,
+                    title,
+                    description=github.GithubObject.NotSet,
+                    state=github.GithubObject.NotSet,
+                    # 'open' | closed
+                    dueOn=github.GithubObject.NotSet,
+                    prefix=''):
     m = getMilestone(repo, title)
     if m == None:
-        print 'Creating milestone "%s"... ' % title,
+        print(prefix+'Creating milestone "%s"... ' % title),
         m = repo.create_milestone(title)
         # For some strange reason the method create_milestone
         # dos not work with the parameter due_on.
         # So after creating the milestone the code below
         # set additional parameters and in particular the due_on
         m.edit(title, state, description, dueOn)
-        print '    milestone #%i created' % m.number
+        print(prefix+'    milestone #%i created' % m.number)
     else:
-        print 'Editing milestone "%s" ... ' % title,
+        print(prefix+'Editing milestone "%s" ... ' % title),
         m.edit(title, state, description, dueOn)
-        print '    milestone #%i edited' % m.number
+        print(prefix+'    milestone #%i edited' % m.number)
     return m
