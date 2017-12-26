@@ -1,0 +1,22 @@
+
+actor permissions
+
+    Etudiant
+        Emprunt : create, read
+
+usecase permissions
+    Prendre
+        Emprunt : create, read
+        Emprunt.date : update
+        Emprunt.dateLimite: read-
+        Prolongation : CRUD
+        EstEmprunteA : create, read, update
+
+entity permissions
+    Emprunt
+        Prendre : create, read
+        Etudiant : CR
+    Emprunt.date : update
+    Emprunt.dateLimite: read-
+    Prolongation : CRUD
+    EstEmprunteA : create, read, update
