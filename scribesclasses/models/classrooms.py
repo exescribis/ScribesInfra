@@ -108,7 +108,7 @@ class Classroom(object):
         return self.repoById['root']
 
     @property
-    def root(self):
+    def web(self):
         return self.repoById['web']
 
 
@@ -161,6 +161,8 @@ class Classroom(object):
         s['org_url'] = self.org.url
         s['local_org_dir'] = self.org.dir
 
+
+        #------ hq ----------------------------------
         s['hq_repo_name'] = self.hq.name
         s['hq_repo_url'] = self.hq.url
         s['hq_repo_account_url'] = \
@@ -168,6 +170,8 @@ class Classroom(object):
         s['hq_root_repo_dir'] = self.hq.dir
         s['hq_build_dir'] = self.hq.buildDir
 
+
+        #------ root --------------------------------
         s['root_repo_name'] = self.root.name
         s['root_repo_url'] = self.root.url
         s['root_repo_account_url'] = \

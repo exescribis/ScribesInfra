@@ -28,6 +28,7 @@ class RepositoryConfiguration(object):
     def __init__(self,
                  classroom,
                  id,
+                 name,
                  description=None,
                  secret=None,
                  private=None,
@@ -47,6 +48,9 @@ class RepositoryConfiguration(object):
         #type: 'Classroom'
 
         self.id=id
+        #type: Text
+
+        self.name=name
         #type: Text
 
         self.description=_choice(description, [id,'description'], '')
@@ -96,12 +100,15 @@ class Repository(object):
     def __init__(self,
                  classroom,
                  id,
-                 repoConfig=None):
+                 repoConfig):
         self.classroom=classroom
         self._id=id
-        self.repoConfig=(
-            repoConfig if repoConfig is not None
-            else RepositoryConfiguration(classroom, id))
+        self.repoConfig=repoConfig
+            # (
+            # repoConfig if repoConfig is not None
+            # else RepositoryConfiguration(
+            #     classroom, id))
+        self.name=self.repoConfig.name
         self.description=self.repoConfig.description
         self.secret=self.repoConfig.secret
         self.private=self.repoConfig.private
@@ -138,10 +145,6 @@ class Repository(object):
     @property
     def id(self):
         return self._id
-
-    @abstractproperty
-    def name(self):
-        pass
 
     @property
     def labels(self):
@@ -217,17 +220,12 @@ class WebRepository(Repository):
             repoConfig=(
                 RepositoryConfiguration(
                     classroom=classroom,
-                    id='web',
-                    description='Web repository for %s' % classroom.grade
+                    id=id,
+                    name='%s.github.io' % classroom.grade,
+                    description='Web repository for %s'
+                                % classroom.grade
                 )),
         )
-
-    @property
-    def name(self):
-        """
-        e.g. l3miage.github.io
-        """
-        return '%s.github.io' % self.classroom.grade
 
     @property
     def dir(self):
@@ -281,16 +279,6 @@ class RegularRepository(Repository):
             repoConfig=repoConfig)
 
     @property
-    def name(self):
-        """
-        The name of the github repository (e.g. l3miage-bdsi-hq)
-        """
-        return '%s-%s' % (
-            self.classroom.course,
-            self.id
-        )
-
-    @property
     def dir(self):
         """
         The directory on the local disk
@@ -332,6 +320,10 @@ class RootRepository(MainRepository):
                 RepositoryConfiguration(
                     classroom=classroom,
                     id=id,
+                    name='%s-%s' % (
+                        classroom.course,
+                        id
+                    ),
                     description='DO NOT FORK! This repository contains skeletons'
                 )),
         )
@@ -347,6 +339,10 @@ class InfoRepository(MainRepository):
                 RepositoryConfiguration(
                     classroom=classroom,
                     id=id,
+                    name='%s-%s' % (
+                        classroom.course,
+                        id
+                    ),
                     description='Information about the course'
                 )),
         )
@@ -361,6 +357,10 @@ class HQRepository(MainRepository):
                 RepositoryConfiguration(
                     classroom=classroom,
                     id=id,
+                    name='%s-%s' % (
+                        classroom.course,
+                        id
+                    ),
                     description='Headquarters. This repository is visible by staff only!'
                 )),
         )
@@ -404,11 +404,11 @@ class GroupRepository(RegularRepository):
                 RepositoryConfiguration(
                     classroom=self.group.classroom,
                     id=id,
+                    name=self.group.groupList.factory.repoName(self.group.key),
                     description=self.group.groupList.factory.repoDescription(
-                    key=self.group.key)
+                    key=group.key)
                 )),
         )
-
 
     @property
     def dir(self):

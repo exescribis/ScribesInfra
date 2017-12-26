@@ -13,6 +13,11 @@ def repo(username="", reponame=""):
             return githubbot._repo_
     else:
         o = users.user(username)
+        if o is None:
+            raise ValueError(
+                'No (visible) user/organization "%s" (was looking for repo "%s")'
+                % (username, reponame)
+            )
         r = o.get_repo(reponame)
         return r
 

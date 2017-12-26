@@ -9,7 +9,8 @@ def user(name=''):
     if name=='':
         return githubbot._user_
     else:
-        return githubbot._gh_.get_user(name)
+        user=githubbot._gh_.get_user(name)
+        return user
 
 
 def org(name=''):

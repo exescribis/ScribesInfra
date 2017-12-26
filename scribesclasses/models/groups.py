@@ -42,8 +42,6 @@ class GroupFactory(object):
         Otherwise return something like 'G12'
         """
         p=self.namePattern
-        print('=============',p)
-
         if key is None:
             return p
         else:
@@ -59,10 +57,6 @@ class GroupFactory(object):
         p=self.repoNamePattern.format(
             course=self.groupList.classroom.course,
             namepat=self.namePattern)
-        print('=============',self.groupList.classroom.course)
-        print('-------------', self.namePattern)
-        print('--------------', self.repoNamePattern)
-        exit(0)
 
         if key is None:
             return p
@@ -138,6 +132,7 @@ class Group(object):
     def __init__(self, groupList, key, secret, team=None):
         self.groupList = groupList #type: GroupList
         self.key = key #type: Text
+        self.name=self.groupList.factory.name(self.key)
         self.secret = secret #type: Text
         self.team = team #type: Optional['Team']
         #type: will be set in team constructor

@@ -32,7 +32,8 @@ class LogicalIssue(object):
         self.repoName = repoName
 
         #: github repository object
-        self.repo = repositories.repo(orgName,repoName)
+        self.repo = repositories.repo(orgName, repoName)
+
 
         #: str  template for the title. May contain some substitution patterns
         self.titleTemplate = titleTemplate

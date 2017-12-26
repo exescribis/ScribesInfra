@@ -101,7 +101,7 @@ class Work(object):
             The directory where the work files are stored locally.
             e.g. /home/jmfavre/DEV/m2gi/m2gi-idm-hq/CyberBiblibliotheque/.assignments/USE
         :param orgName: e.g.
-            The GitHub organization where issues are created/stored 'orgName'
+            The GitHub organization name where issues are created/stored 'orgName'
             e.g. "m2gi"
         :param definitionRepoName:
             The GitHub repo name for the definition issue.
@@ -476,6 +476,7 @@ class Work(object):
                 self.definitionRepoName,
                 self.definitionTitlePattern
             )),
+        # print('####',self.orgName, self.definitionRepoName)
         self.definitionLogicalIssue = githubbot.logicalissues.LogicalIssue(
                 orgName=self.orgName,
                 repoName=self.definitionRepoName,

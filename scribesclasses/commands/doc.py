@@ -4,7 +4,7 @@ import scribesclasses.engines.onweb
 
 class DocCommand(commandset.Command):
     name =          'doc'
-    help =          'generate documentation for the claassroom'
+    help =          'generate documentation for the classroom'
     description =   'TODO'
 
     def addArguments(self):

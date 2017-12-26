@@ -17,12 +17,13 @@ class Assignment(object):
         self.workName = self.assignmentName
         self.workDirectory = self.assignmentDirectory
         assert(os.path.isdir(self.workDirectory))
+        repo_pattern=self.classroom.groupList.factory.repoName(key=None)
         self.work = works.Work(
-                self.workDirectory,
-                self.classroom.org(),
-                self.classroom.root.name,
-                self.classroom.groupList.keys(),
-                self.classroom.groupList.factory.repoName())
+                workDirectory=self.workDirectory,
+                orgName=self.classroom.org.name,
+                definitionRepoName=self.classroom.root.name,
+                itemKeys=self.classroom.groupList.keys(),
+                itemRepoNamePattern=repo_pattern)
 
     def showWork(self):
         self.work.show()
