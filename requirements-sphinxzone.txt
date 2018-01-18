@@ -1,0 +1,8 @@
+unicodecsv          # for typedtable
+python-dateutil     # module dateutil for typedtable
+
+sqlalchemy          # for sqlhelpers
+sqlalchemy_utils    # for sqlhelpers
+
+gspread             # for googlehelpers
+oauth2client        # for googlehelpers
