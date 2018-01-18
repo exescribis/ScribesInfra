@@ -3,7 +3,7 @@
 # timeparse     # module timeparse for timetracking # local copy unchanged
 pygithub        # module github for package githubbot
 #               # package githubbot for scribesclasses.engines.github
-sphinx          # for onweb
+sphinx==1.5.2   # for onweb
 #               # changecontrol for scribesclasses.engines.changespec
 # SphinxZone    # module sphinxproblems for scribesclasses.engines.onweb
 #               # githubbot for scribesclass.models.{classroom,works}
