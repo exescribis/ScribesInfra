@@ -232,21 +232,22 @@ class StructuredPrinterConfigs(object):
 
 class StructuredPrinter(AbstractPrinter):
     """
-    A printer with different predefined zone corresponding
-    to methods.
+    A printer with different predefined zones
+    (top, body, bottom) with predefined nested zone
+    for issues. Each zone corresponds to a method doXXX()
     
-    doTop
-        doTopTitle
-        doIssueSummary
-        doIssues         if issueMode='top'
-        doTopInner
-    
-    doBody
-    
-    doBottom
-        doBottomInner
-        doIssues         if issueMode='bottom'
-        doBottomTitle
+        doTop
+            doTopTitle
+            doIssueSummary
+            doIssues         if issueMode='top'
+            doTopInner
+
+        doBody
+
+        doBottom
+            doBottomInner
+            doIssues         if issueMode='bottom'
+            doBottomTitle
     """
     __metaclass__ = ABCMeta
 
@@ -384,7 +385,7 @@ class StructuredPrinter(AbstractPrinter):
                         s,
                         styled=self.config.styled)
                 else:
-                    s = Styles.smallIssue.do(
+                    s = Styles.mediumIssue.do(
                         s,
                         styled=self.config.styled)
             self.outLine(s)

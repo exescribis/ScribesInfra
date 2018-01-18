@@ -86,12 +86,12 @@ from modelscripts.metamodels.usecases import (
 from modelscripts.metamodels.scenarios import (
     ScenarioModel,
     ActorInstance,
-    ContextBlock,
     METAMODEL
 )
 from modelscripts.metamodels.scenarios.blocks import (
     UsecaseInstanceBlock,
     TopLevelBlock,
+    ContextBlock,
 )
 from modelscripts.metamodels.scenarios.operations import (
     ObjectCreation,
@@ -150,7 +150,6 @@ class _SexOrSoilSource(ModelSourceFile):
                          'permission',   # not used yet
                          'access', # not used yet
                          'update',
-                         'check',
                          'assertQuery',
                          'assocClass',
                          'delete',
@@ -226,7 +225,7 @@ class _SexOrSoilSource(ModelSourceFile):
         # - parsing will be done later
         if DEBUG>=2:
             print(
-                'sxp: reading/parsing the file %s for imports' %
+                "SXP: processing imports from  '%s' for imports" %
                 originalFileName)
         super(_SexOrSoilSource, self).__init__(
             fileName=originalFileName,
@@ -240,8 +239,8 @@ class _SexOrSoilSource(ModelSourceFile):
             prequelFileName=originalFileName,
             recognizeUSEOCLNativeModelDefinition=False)
         if DEBUG>=2:
-            print(
-                'sxp: reading/parsing file for imports done')
+            print('SXP: import processing done for %s ' %
+                  originalFileName)
 
         self.scenarioModel.usecaseModel=self.usecaseModel
         self.scenarioModel.classModel=self.classModel
@@ -306,6 +305,9 @@ class _SexOrSoilSource(ModelSourceFile):
             self._parse(self._parsePrefix)
             if self.isValid:
                 if not self.scenarioModel.isEvaluated:  # .model. but typing
+                    if DEBUG >= 2:
+                        print('SXP: evaluating scenario for')
+
                     self.model.evaluate()
 
         # else:
@@ -327,7 +329,7 @@ class _SexOrSoilSource(ModelSourceFile):
         class _S(object):
             """
             Current state of the parser.
-            Required for _getBlock
+            Required for _get_block
             """
             original_line=''
 
@@ -344,6 +346,22 @@ class _SexOrSoilSource(ModelSourceFile):
             context_block = None
             # type: Optional[ContextBlock]
             #: can be nested in other blocks (in practice in should not as one cannot find the order of execution based on blocks)
+
+            scope_stack=[]
+
+            @classmethod
+            def push_scope(cls, scope):
+                #type: (Text) -> None
+                #   TopLevelBlock|ContextBlock|SystemInstance
+                #   |ActorInstance|UsecaseInstanceBlock
+                cls.scope_stack.append(scope)
+
+            @classmethod
+            def pull_scope(cls):
+                try:
+                    return cls.scope_stack.pop()
+                except IndexError:
+                    return None
 
 
 
@@ -376,6 +394,8 @@ class _SexOrSoilSource(ModelSourceFile):
         def _reqClassModel():
             """ Check that the model is available"""
             if self.classModel is None:
+                print('SS'*100)
+                raise NotImplementedError()
                 LocalizedSourceIssue(
                     sourceFile=self,
                     level=Levels.Fatal,
@@ -385,18 +405,33 @@ class _SexOrSoilSource(ModelSourceFile):
                 return self.classModel
 
         def _is_error_line(line):
+            message_extre=[
+                'You can change this check using the ',
+                'This may lead to unexpected behavior.'
+                'because the element type ',
+                "The operation `selectByKind' is only applicable on collections.",
+            ]
+
             # print(line)
-            m1=re.match('^\|\|\|\|\| *<[^>]>.*', line)
-            m2=re.match('^\|\|\|\|\| *:?(Error|ERROR|Warning|WARNING)',line)
+            re1='^\|\|\|\|\| *:? *<[^>]*>.*'
+            m1=re.match(re1, line)
+            re2='^\|\|\|\|\| *:? *(Error|ERROR|Warning|WARNING)'
+            m2=re.match(re2, line)
             return m1 is not None or m2 is not None
 
         begin = prefix + r' *'
         end = ' *$'
 
         if DEBUG>=1:
-            print('\nsxp: Parsing %s with %s usecase model\n' % (
+            print('SXP: Parsing %s with %s usecase model' % (
                 self.soilFileName,
                 'no' if self.usecaseModel is None else 'a'
+            ))
+
+        if DEBUG>=1:
+            print('SXP: Parsing %s with %s class model' % (
+                self.soilFileName,
+                'no' if self.classModel is None else 'a'
             ))
 
         last_check_evaluation=None
@@ -408,9 +443,12 @@ class _SexOrSoilSource(ModelSourceFile):
         in_block_comment = False
         current_eol_comment=None
         current_element=self.model
+        section='header' # header|context|scenario|after|none
 
         for (line_index, line) in enumerate(self.realSourceLines):
 
+            # if DEBUG>=3:
+            #     print('SXP: -- '+line)
             _S.original_line = line
             line = line.replace('\t',' ')
 
@@ -438,13 +476,13 @@ class _SexOrSoilSource(ModelSourceFile):
 
             if DEBUG>=2:
                 if self.evaluateScenario: #'sex':
-                    print ('sxp: #%05i <- %05i : %s' % (
+                    print ('SXP: #%05i <- %05i : %s' % (
                         _S.line_no,
                         _S.sex_line_no,
                         _S.original_line,
                     ))
                 else:
-                    print('sxp: #%05i : %s' % (
+                    print('SXP: #%05i : %s' % (
                         _S.line_no,
                         _S.original_line,
                     ))
@@ -465,7 +503,7 @@ class _SexOrSoilSource(ModelSourceFile):
                 continue
 
             if in_block_comment:
-                r = begin+'^.*\*/(?P<rest>.*)'+end
+                r = begin+'.*\*/(?P<rest>.*)'+end
                 m = re.match(r, line)
                 if m:
                     in_block_comment = False
@@ -482,7 +520,7 @@ class _SexOrSoilSource(ModelSourceFile):
             #--------------------------------------------------
             # This must go after /* */ comments as such a
             # comment can create a blank line
-            r = prefix+''+end
+            r = begin+''+end
             m = re.match(r, line)
             if m:
                 last_doc_comment.clean()
@@ -493,7 +531,7 @@ class _SexOrSoilSource(ModelSourceFile):
             # ------------------------------------------
 
 
-            r = prefix+'--\|(?P<line>.*)'+end
+            r = begin+'--\|(?P<line>.*)'+end
             m = re.match(r, line)
             if m:
                 _line = m.group('line')
@@ -506,21 +544,7 @@ class _SexOrSoilSource(ModelSourceFile):
                 continue
 
     # TODO: to restore
-            # #---------------------------------
-            # # Line comment --
-            # #---------------------------------
-            #
-            # # TODO: check comment processing appiled in use parser
-            # Full line comment
-            r = prefix+' *--(?P<comment>[^@]?.*)'+end
-            m = re.match(r, line)
-            if m:
-                c=m.group('comment')
-                last_doc_comment.add(c)
-                continue
 
-            # Everything that follow is not part of a full line comment
-            last_doc_comment.clean()
 
             # #--------------------------------------------------
             # # EOL comment --
@@ -544,11 +568,9 @@ class _SexOrSoilSource(ModelSourceFile):
             #--------------------------------------------------
             # assert query
             #--------------------------------------------------
-            print('KK'*10+' '+line)
             r = begin+'(?P<kind>\?\??) *(?P<expr>.*) *(?P<assert>--@assertquery) *'+end
             m = re.match(r, line)
             if m:
-                print('22' * 10 + ' ' + line)
 
                 if not self.checkAllowed(
                         feature='assertQuery',
@@ -557,6 +579,14 @@ class _SexOrSoilSource(ModelSourceFile):
                             'Assertions', '.  Skipped.'),
                         level=Levels.Error):
                     continue
+                # if section=='header':
+                #     LocalizedSourceIssue(
+                #         sourceFile=self,
+                #         level=Levels.Warning,
+                #         message='Asserts are not allowed in this section',
+                #         line=_S.line_no
+                #     )
+                #     continue
                 assert_query=AssertQuery(
                     block=_get_block(),
                     expression=m.group('expr'),
@@ -583,6 +613,14 @@ class _SexOrSoilSource(ModelSourceFile):
                             'Queries', '.  Skipped.'),
                         level=Levels.Error):
                     continue
+                # if section=='header':
+                #     LocalizedSourceIssue(
+                #         sourceFile=self,
+                #         level=Levels.Warning,
+                #         message='Queries are not allowed in this section',
+                #         line=_S.line_no
+                #     )
+                #     continue
                 query=Query(
                     block=_get_block(),
                     expression=m.group('expr'),
@@ -605,20 +643,19 @@ class _SexOrSoilSource(ModelSourceFile):
                 # megamodel statements have already been
                 # parse so silently ignore them
                 continue
-            pass
 
-            #-------------------------------------------------
+            #==================================================
             # directives
-            #-------------------------------------------------
+            #==================================================
 
             if re.match(begin+r'--@', line):
 
                 # -------------------------------
-                # @actorinstance <actor> : <instance>
+                # actori <actor> : <instance>
                 # -----------------------------------
 
-                r = (prefix
-                     +'-- *@actori +(?P<name>\w+) *'
+                r = (begin
+                     +'--@actori +(?P<name>\w+) *'
                      +': *(?P<actor>\w+)'
                      +end)
                 m = re.match(r, line)
@@ -630,12 +667,19 @@ class _SexOrSoilSource(ModelSourceFile):
                                 'Actor instances', '. Skipped.'),
                             level=Levels.Error):
                         continue
-
+                    # if section != 'header':
+                    #     LocalizedSourceIssue(
+                    #         sourceFile=self,
+                    #         level=Levels.Warning,
+                    #         message=
+                    #             'Actors must be declared before.',
+                    #         line=_S.line_no
+                    #     )
                     if self.usecaseModel is None:
                         LocalizedSourceIssue(
                             sourceFile=self,
-                            level=Levels.Warning,
-                            message='No usecase model provided. Directive ignored',
+                            level=Levels.Error,
+                            message='No usecase model provided.',
                             line=_S.line_no
                         )
                         continue
@@ -670,14 +714,15 @@ class _SexOrSoilSource(ModelSourceFile):
                         lineNo=_S.line_no
                     )
                     self.scenarioModel.actorInstanceNamed[iname]=ai
+                    _S.push_scope('ActorInstance')
                     continue
 
                 # -------------------------------
-                # @systemI <system> : <system>
+                # @systemi <system> : <system>
                 # -----------------------------------
 
-                r = (prefix
-                     +'--@system +(?P<name>\w+) *'
+                r = (begin
+                     +'--@systemI +(?P<name>\w+) *'
                      +': *(?P<actor>\w+)'
                      +end)
                 m = re.match(r, line)
@@ -688,6 +733,7 @@ class _SexOrSoilSource(ModelSourceFile):
                         message='Definition of system instance not implemented yet. Ignored',
                         line=_S.line_no
                     )
+                    # _S.push_scope('SystemInstance')
                     continue
 
 
@@ -695,7 +741,7 @@ class _SexOrSoilSource(ModelSourceFile):
                 # @context
                 # -------------------------------------------------
 
-                r = prefix+'-- *@context'+end
+                r = begin+'--@context'+end
                 m = re.match(r, line)
                 if m:
 
@@ -706,7 +752,15 @@ class _SexOrSoilSource(ModelSourceFile):
                             level=Levels.Error):
                         continue
 
-
+                    if section not in ['header', 'none']:
+                        LocalizedSourceIssue(
+                            sourceFile=self,
+                            level=Levels.Error,
+                            message='Context block must be at'
+                                    ' the top of the file.',
+                            line=_S.line_no
+                        )
+                        continue
                     if _S.main_block is not None:
 
                         # TODO: this limitation could be removed. But this
@@ -716,7 +770,8 @@ class _SexOrSoilSource(ModelSourceFile):
                         LocalizedSourceIssue(
                             sourceFile=self,
                             level=Levels.Fatal,
-                            message='Context cannot be nested',
+                            message='Context cannot be nested'
+                                    ' in another block',
                             line=_S.line_no
                         )
                         continue
@@ -725,38 +780,35 @@ class _SexOrSoilSource(ModelSourceFile):
                             self.scenarioModel,
                             lineNo=_S.line_no,
                         )
+                    _S.push_scope('ContextBlock')
+                    section='context'
                     continue
 
-                # -------------------------------------------------
-                # @endcontext
-                # -------------------------------------------------
-
-                r = prefix+'-- *@endcontext'+end
+                #--------------------------------------------------
+                # scenario begin
+                #--------------------------------------------------
+                r = (begin+r'--@scenariobegin'+end)
                 m = re.match(r, line)
                 if m:
-                    if not self.checkAllowed(
-                            feature='context',
-                            message=_entityError(
-                                'Context blocks', '. Skipped.'),
-                            level=Levels.Error):
-                        continue
-                    if _S.context_block is None:
+                    print('##' * 100 + line)
+                    if section not in ['none', 'header']:
                         LocalizedSourceIssue(
                             sourceFile=self,
                             level=Levels.Error,
-                            message='No context opened. Directive ignored.',
+                            message=
+                                'The scenario must start'
+                                ' at the toplevel.',
                             line=_S.line_no
                         )
-                        continue
-                    _S.context_block=None
+                    _S.push_scope('Scenario')
+                    section='scenario'
                     continue
 
                 #--------------------------------------------------
-                # @uci <actori> <usecase>
+                # usecasei <actori> <usecase>
                 #--------------------------------------------------
-                r = (prefix
-                     # +r'-- *@ *(uci|usecase( +instance)?)'
-                     +r'-- *@ *uci'
+                r = (begin
+                     +r'--@usecasei'
                      +r' +(?P<name>\w+)'
                      # TODO: add online definition of actor instance
                      # +r' *(: *(?P<actor>\w+))?'
@@ -764,18 +816,30 @@ class _SexOrSoilSource(ModelSourceFile):
                      +end)
                 m = re.match(r, line)
                 if m:
+                    _S.push_scope('UsecaseInstanceBlock')
                     if not self.checkAllowed(
                             feature='usecase',
                             message=_entityError(
-                                'Actor instance definitions', '. Skipped.'),
+                                'Actor instance definitions',
+                                '. Skipped.'),
                             level=Levels.Error):
                         continue
                     if self.usecaseModel is None:
                         LocalizedSourceIssue(
                             sourceFile=self,
-                            level=Levels.Warning,
+                            level=Levels.Error,
                             message=
-                                'No use case model provided. Directive ignored.',
+                                'No use case model provided.',
+                            line=_S.line_no
+                        )
+                        continue
+                    if section != 'scenario':
+                        LocalizedSourceIssue(
+                            sourceFile=self,
+                            level=Levels.Error,
+                            message=
+                                'Usecase blocks must in the '
+                                'scenario section',
                             line=_S.line_no
                         )
                         continue
@@ -783,7 +847,7 @@ class _SexOrSoilSource(ModelSourceFile):
                         LocalizedSourceIssue(
                             sourceFile=self,
                             level=Levels.Error,
-                            message='Context block is not closed. Assume it is',
+                            message='Context block is not closed.',
                             line=_S.line_no
                         )
                         _S.context_block = None
@@ -796,7 +860,8 @@ class _SexOrSoilSource(ModelSourceFile):
                                       % ainame ),
                             line=_S.line_no
                         )
-                    ai=self.scenarioModel.actorInstanceNamed[ainame] #type: ActorInstance
+                    ai=self.scenarioModel.actorInstanceNamed[ainame]
+                    #type: ActorInstance
                     a=ai.actor #type: Actor
                     ucname=m.group('usecase')
                     if ucname not in self.scenarioModel.usecaseModel.system.usecaseNamed:
@@ -827,46 +892,14 @@ class _SexOrSoilSource(ModelSourceFile):
                     )
                     continue
 
-                #--------------------------------------------------
-                #-- @enduci
-                #--------------------------------------------------
 
-                r = (prefix
-                     +r'-- *@enduci'
-                     +end)
-                m = re.match(r, line)
-                if m:
-                    if not self.checkAllowed(
-                            feature='usecase',
-                            message=_entityError(
-                                'Usecase instances', '. Skipped.'),
-                            level=Levels.Error):
-                        continue
-                    if self.usecaseModel is None:
-                        LocalizedSourceIssue(
-                            sourceFile=self,
-                            level=Levels.Warning,
-                            message=
-                                'No use case model provided. Directive ignored.',
-                            line=_S.line_no
-                        )
-                        continue
-                    if not isinstance(_S.main_block, UsecaseInstanceBlock):
-                        LocalizedSourceIssue(
-                            sourceFile=self,
-                            level=Levels.Error,
-                            message='No opened usecase instance. Directive ignored.',
-                            line=_S.line_no
-                        )
-                    _S.main_block=None
-                    continue
 
 
                 #--------------------------------------------------
                 #-- @something ...
                 #--------------------------------------------------
 
-                r = (begin+'-- *@(?P<name>[\w]*).*'+end)
+                r = (begin+'--@(?P<name>[\w]*).*'+end)
                 m = re.match(r, line)
                 if m:
                     directive=(
@@ -874,9 +907,9 @@ class _SexOrSoilSource(ModelSourceFile):
                         else m.group('name'))
                     LocalizedSourceIssue(
                         sourceFile=self,
-                        level=Levels.Warning,
+                        level=Levels.Error,
                         message=(
-                            'Directive "%s" not recognized. Ignored.'
+                            'Directive "%s" not recognized or with wrong format.'
                             % directive),
                         line=_S.line_no
                     )
@@ -893,9 +926,9 @@ class _SexOrSoilSource(ModelSourceFile):
 
 
 
-            #==================================================
+            #==========================================================
             # ! operations
-            #==================================================
+            #==========================================================
 
             if re.match(begin + r'!', line):
 
@@ -906,6 +939,16 @@ class _SexOrSoilSource(ModelSourceFile):
                             'Update operations', '. Skipped.'),
                         level=Levels.Error):
                     continue
+
+                if section not in ['context', 'scenario']:
+                    LocalizedSourceIssue(
+                        sourceFile=self,
+                        level=Levels.Error,
+                        message=
+                            'Update operations (!) are only allowed in'
+                            ' context or scenario sections.',
+                        line=_S.line_no
+                    )
 
                 #--------------------------------------------------
                 #--- object creation (old syntax)
@@ -929,7 +972,7 @@ class _SexOrSoilSource(ModelSourceFile):
                             level=Levels.Warning)
                     id=None
                     if DEBUG:
-                        print('sxp: %s := new %s' % (variable,classname))
+                        print('SXP: %s := new %s' % (variable,classname))
 
                     ObjectCreation(
                         block=_get_block(),
@@ -956,7 +999,7 @@ class _SexOrSoilSource(ModelSourceFile):
                     classname=m.group('className')
                     id=m.group('id')
                     if DEBUG:
-                        print('sxp: %s := new %s : %s' % (variable,id,classname))
+                        print('SXP: %s := new %s : %s' % (variable,id,classname))
 
                     ObjectCreation(
                         block=_get_block(),
@@ -982,7 +1025,7 @@ class _SexOrSoilSource(ModelSourceFile):
                     attribute=m.group('attribute')
                     expression=m.group('expr')
                     if DEBUG:
-                        print ('sxp: %s.%s := %s' % (
+                        print ('SXP: %s.%s := %s' % (
                             variable, attribute, expression))
                     AttributeAssignment(
                         block=_get_block(),
@@ -1017,7 +1060,7 @@ class _SexOrSoilSource(ModelSourceFile):
                     assoc=_reqClassModel().associationNamed[
                         m.group('associationName')]
                     if DEBUG:
-                        print('sxp: new (%s) : %s' % (
+                        print('SXP: new (%s) : %s' % (
                             ','.join(names),
                             assoc.name ))
                     LinkCreation(
@@ -1054,7 +1097,7 @@ class _SexOrSoilSource(ModelSourceFile):
                                 ' Deprecated syntax.'),
                             level=Levels.Warning)
                     if DEBUG:
-                        print(('sxp: new %s between (%s)' % (
+                        print(('SXP: new %s between (%s)' % (
                             assoc_class_name,
                             ','.join(names))
                         ))
@@ -1093,7 +1136,7 @@ class _SexOrSoilSource(ModelSourceFile):
                     names = m.group('objectList').replace(' ','').split(',')
                     ac = _reqClassModel().associationClassNamed[assoc_class_name]
                     if DEBUG:
-                        print(("sxp: new %s('%s') between (%s)" % (
+                        print(("SXP: new %s('%s') between (%s)" % (
                             assoc_class_name,
                             id,
                             ','.join(names)
@@ -1124,7 +1167,7 @@ class _SexOrSoilSource(ModelSourceFile):
                         continue
                     name = m.group('name')
                     if DEBUG:
-                        print( 'sxp: delete object %s' % name )
+                        print( 'SXP: delete object %s' % name )
                     ObjectDestruction(
                         block=_get_block(),
                         variableName=name,
@@ -1168,7 +1211,7 @@ class _SexOrSoilSource(ModelSourceFile):
                     # link_name = '_'.join(object_names)
                     # del self.state.links[link_name]
                     if DEBUG:
-                        print( 'sxp: delete link from %s between %s' % (
+                        print( 'SXP: delete link from %s between %s' % (
                             association_name,
                             object_names
                         ))
@@ -1233,7 +1276,8 @@ class _SexOrSoilSource(ModelSourceFile):
                         +end)
                     m = re.match(r, line)
                     if m:
-                        current_cardinality_info['objectName']=m.group('object')
+                        current_cardinality_info['objectName']=\
+                            m.group('object')
                         current_cardinality_info['sourceClassName']=(
                             m.group('sourceClass'))
                         current_cardinality_info['targetClassName'] = (
@@ -1249,29 +1293,45 @@ class _SexOrSoilSource(ModelSourceFile):
                         +end)
                     m = re.match(r, line)
                     if m:
-                        role=_reqClassModel()._findRole(
-                            current_cardinality_info['associationName'],
-                            m.group('role'))
-                        if role in last_check_evaluation.cardinalityEvaluations:
-                            card_eval = (
-                                last_check_evaluation.cardinalityEvaluations[role])
+                        if last_check_evaluation is None:
+                            # This occur with instance with check foo
+                            # which is an error 'no invariant foo'
+                            # but still reported and with an actual result
+                            Issue(
+                                self,
+                                level=Levels.Fatal,
+                                message='Error in parsing the output '
+                                        'of check results.')
                         else:
-                            card_eval = (
-                                CardinalityViolation(
-                                    checkEvaluation=last_check_evaluation,
-                                    role=role,
-                                ))
-                        actual_card = current_cardinality_info['numberOfObjects']  # type: int
+                            role=_reqClassModel()._findRole(
+                                current_cardinality_info
+                                    ['associationName'],
+                                m.group('role'))
 
-                        CardinalityViolationObject(
-                            cardinalityViolation=card_eval,
-                            violatingObject=(
-                                current_cardinality_info['objectName']
-                            ),
-                            actualCardinality=(
-                                actual_card
+                            # Get the cardinality evaluation or create it
+                            if role in (last_check_evaluation
+                                        .cardinalityEvaluationByRole):
+                                card_eval = (
+                                    last_check_evaluation
+                                        .cardinalityEvaluationByRole[role])
+                            else:
+                                card_eval = (
+                                    CardinalityViolation(
+                                        checkEvaluation=last_check_evaluation,
+                                        role=role,
+                                    ))
+                            actual_card = current_cardinality_info[
+                                'numberOfObjects']  # type: int
+
+                            CardinalityViolationObject(
+                                cardinalityViolation=card_eval,
+                                violatingObject=(
+                                    current_cardinality_info['objectName']
+                                ),
+                                actualCardinality=(
+                                    actual_card
+                                )
                             )
-                        )
 
                         continue
 
@@ -1306,20 +1366,29 @@ class _SexOrSoilSource(ModelSourceFile):
                     +end)
                 m = re.match(r, line)
                 if m:
-                    invariant=_reqClassModel()._findInvariant(
-                        classOrAssociationClassName=m.group('context'),
-                        invariantName=m.group('invname')
-                    )
-                    if m.group('result')=='OK':
-                        InvariantValidation(
-                            checkEvaluation=last_check_evaluation,
-                            invariant=invariant,
-                        )
+                    if last_check_evaluation is None:
+                        # This occur with instance with check foo
+                        # which is an error 'no invariant foo'
+                        # but still reported and with an actual result
+                        Issue(
+                            self,
+                            level=Levels.Fatal,
+                            message='Error in parsing the outup of check')
                     else:
-                        current_invariant_violation=InvariantViolation(
-                            checkEvaluation=last_check_evaluation,
-                            invariant=invariant,
+                        invariant=_reqClassModel()._findInvariant(
+                            classOrAssociationClassName=m.group('context'),
+                            invariantName=m.group('invname')
                         )
+                        if m.group('result')=='OK':
+                            InvariantValidation(
+                                checkEvaluation=last_check_evaluation,
+                                invariant=invariant,
+                            )
+                        else:
+                            current_invariant_violation=InvariantViolation(
+                                checkEvaluation=last_check_evaluation,
+                                invariant=invariant,
+                            )
                     continue
 
                 if current_invariant_violation:
@@ -1346,14 +1415,23 @@ class _SexOrSoilSource(ModelSourceFile):
                         +end)
                     m = re.match(r, line)
                     if m:
-                        names=[ x.strip()
-                                for x in m.group('expr').split(',')
-                                if x!='' ]
-                        current_invariant_violation.violatingObjects=names
-                        current_invariant_violation.violatingObjectsType=m.group('type')
-                        current_invariant_violation.violatingObjectType=m.group('type')
-                        current_invariant_violation=None
-                        continue
+                        if last_check_evaluation is None:
+                            # This occur with instance with check foo
+                            # which is an error 'no invariant foo'
+                            # but still reported and with an actual result
+                            Issue(
+                                self,
+                                level=Levels.Fatal,
+                                message='Error in parsing the outup of check')
+                        else:
+                            names=[ x.strip()
+                                    for x in m.group('expr').split(',')
+                                    if x!='' ]
+                            current_invariant_violation.violatingObjects=names
+                            current_invariant_violation.violatingObjectsType=m.group('type')
+                            current_invariant_violation.violatingObjectType=m.group('type')
+                            current_invariant_violation=None
+                            continue
 
                     # WARNING: this rule MUST be after the one
                     # like -> Set\{ ...
@@ -1363,9 +1441,18 @@ class _SexOrSoilSource(ModelSourceFile):
                         +end)
                     m = re.match(r, line)
                     if m:
-                        current_invariant_violation.resultValue=m.group('expr')
-                        current_invariant_violation.resultType=m.group('type')
-                        continue
+                        if last_check_evaluation is None:
+                            # This occur with instance with check foo
+                            # which is an error 'no invariant foo'
+                            # but still reported and with an actual result
+                            Issue(
+                                self,
+                                level=Levels.Fatal,
+                                message='Error in parsing the output of check')
+                        else:
+                            current_invariant_violation.resultValue=m.group('expr')
+                            current_invariant_violation.resultType=m.group('type')
+                            continue
 
                     # WARNING: this rule MUST be at the end
                     # Otherwise this one catch the other ones
@@ -1374,9 +1461,18 @@ class _SexOrSoilSource(ModelSourceFile):
                         +end)
                     m = re.match(r, line)
                     if m:
-                        current_invariant_violation.subexpressions.append(
-                            m.group('expr'))
-                        continue
+                        if last_check_evaluation is None:
+                            # This occur with instance with check foo
+                            # which is an error 'no invariant foo'
+                            # but still reported and with an actual result
+                            Issue(
+                                self,
+                                level=Levels.Fatal,
+                                message='Error in parsing the outup of check')
+                        else:
+                            current_invariant_violation.subexpressions.append(
+                                m.group('expr'))
+                            continue
 
                 #------------------------------------------------------
                 #  query evaluation
@@ -1413,16 +1509,21 @@ class _SexOrSoilSource(ModelSourceFile):
             # ---- check
             # ------------------------------------------------------
             # WARNING: this rule MUST go after the rules thats starts
-            # with 'check' something as this one will take precedence!
-            r = begin + 'check *(?P<params>( -[avd])*)' + end
+            # with 'check' (e.g. checking ...) as this one will take
+            # precedence.
+            #
+            # This check could be the result of various scn statement:
+            # a.  'check -v -a -d' means "? check" (an explicit check)
+            # b.  'check -a -d -v' means "end"
+            # c.  'check -v -d -a' means "scenario end'
+            #
+            # First process the check, then process the meaning
+
+            r = begin + 'check *(?P<params>( -[avd])+)' + end
             m = re.match(r, line)
             if m:
-                if not self.checkAllowed(
-                        feature='assocClass',
-                        message=_entityError(
-                            'Checks', '. Skipped.'),
-                        level=Levels.Error):
-                    continue
+                # (1) process the check statement
+                #
                 check = Check(
                     block=_get_block(),
                     verbose='v' in m.group('params'),
@@ -1434,7 +1535,193 @@ class _SexOrSoilSource(ModelSourceFile):
                     last_check_evaluation = _USEImplementedCheckEvaluation(
                         blockEvaluation=None,
                         op=check)
-                continue
+
+                if re.match(begin + 'check -v -a -d' + end, line):
+                    # -------------------------------------------------
+                    # (2a) process 'end' ('check -a -d -v')
+                    # -------------------------------------------------
+                    # check already process. Everything is ok.
+                    continue
+
+                if re.match(begin+'check -a -d -v'+end, line):
+                    # -------------------------------------------------
+                    # (2b) process 'end' ('check -a -d -v')
+                    # -------------------------------------------------
+                    # end of context or usecase block are
+                    # replaced by 'check -a -d -v' (in the exact order)
+                    # because it is not possible to add comment on the
+                    # same line. Otherwise it woulf be '--@end'
+
+                    scope = _S.pull_scope()
+
+                    if scope is None:
+
+                        # end close nothing
+                        section='none'
+                        print('MM'*10+str(_S.line_no)+' '+line)
+                        LocalizedSourceIssue(
+                            sourceFile=self,
+                            level=Levels.Error,
+                            message='No block to close.',
+                            line=_S.line_no
+                        )
+                        continue
+
+                    if scope=='ContextBlock':
+
+                        # end close context block
+                        section='none'
+                        if not self.checkAllowed(
+                                feature='context',
+                                message=_entityError(
+                                    'Context blocks', '. Skipped.'),
+                                level=Levels.Error):
+                            continue
+                        if _S.context_block is None:
+                            LocalizedSourceIssue(
+                                sourceFile=self,
+                                level=Levels.Error,
+                                message='No context opened. Directive ignored.',
+                                line=_S.line_no
+                            )
+                            continue
+                        _S.context_block = None
+                        continue
+
+                    if scope=='UsecaseInstanceBlock':
+                        section='scenario'
+                        # end close usecasei block
+                        if not self.checkAllowed(
+                                feature='usecase',
+                                message=_entityError(
+                                    'Usecase instances', '. Skipped.'),
+                                level=Levels.Error):
+                            continue
+                        if self.usecaseModel is None:
+                            LocalizedSourceIssue(
+                                sourceFile=self,
+                                level=Levels.Error,
+                                message=
+                                'No use case model provided.'
+                                ' Cannot close the usecasei block',
+                                line=_S.line_no
+                            )
+                            continue
+                        if not isinstance(_S.main_block,
+                                          UsecaseInstanceBlock):
+                            LocalizedSourceIssue(
+                                sourceFile=self,
+                                level=Levels.Error,
+                                message='No opened usecase instance. '
+                                        'Directive ignored.',
+                                line=_S.line_no
+                            )
+                        _S.main_block = None
+                        continue
+
+                    LocalizedSourceIssue(
+                        sourceFile=self,
+                        level=Levels.Error,
+                        message='Cannot close the block.',
+                        line=_S.line_no
+                    )
+                    continue
+
+                if re.match(begin+' *check -v -d -a *'+end, line):
+                    # -------------------------------------------------
+                    # (2c) 'scenario end' ('check -v -d -a')
+                    # -------------------------------------------------
+
+                    scope = _S.pull_scope()
+                    if scope is None:
+                        # end close nothing
+                        section='none'
+                        LocalizedSourceIssue(
+                            sourceFile=self,
+                            level=Levels.Error,
+                            message='Block scenario is not opened',
+                            line=_S.line_no
+                        )
+                        continue
+
+                    if scope!='Scenario':
+                        LocalizedSourceIssue(
+                            sourceFile=self,
+                            level=Levels.Fatal,
+                            message='All blocks must be closed.',
+                            line=_S.line_no
+                        )
+                        continue
+
+                    print('--' * 10 + line)
+
+                    section='after'
+                    _S.main_block=None
+                    continue
+
+
+                            # -------------------------------------------------
+                    # (2b) process 'scenario end' ('check -v -d -a')
+                    # -------------------------------------------------
+
+
+                    # -------------------------------------------------
+                    # @end context
+                    # -------------------------------------------------
+
+                    # r = prefix+'-- *@endcontext'+end
+                    # m = re.match(r, line)
+                    # if m:
+                    #     if not self.checkAllowed(
+                    #             feature='context',
+                    #             message=_entityError(
+                    #                 'Context blocks', '. Skipped.'),
+                    #             level=Levels.Error):
+                    #         continue
+                    #     if _S.context_block is None:
+                    #         LocalizedSourceIssue(
+                    #             sourceFile=self,
+                    #             level=Levels.Error,
+                    #             message='No context opened. Directive ignored.',
+                    #             line=_S.line_no
+                    #         )
+                    #         continue
+                    #     _S.context_block=None
+                    #     continue
+                    #
+                    # #--------------------------------------------------
+                    # #-- @enduci
+                    # #--------------------------------------------------
+                    #
+                    # r = (prefix
+                    #      +r'-- *@enduci'
+                    #      +end)
+                    # m = re.match(r, line)
+                    # if m:
+                    #     if not self.checkAllowed(
+                    #             feature='usecase',
+                    #             message=_entityError(
+                    #                 'Usecase instances', '. Skipped.'),
+                    #             level=Levels.Error):
+                    #         continue
+                    #     if self.usecaseModel is None:
+                    #         LocalizedSourceIssue(
+                    #             sourceFile=self,
+                    #             level=Levels.Warning,
+                    #             message=
+                    #                 'No use case model provided. Directive ignored.',
+                    #             line=_S.line_no
+                    #         )
+                    #         continue
+                    #     if not isinstance(_S.main_block, UsecaseInstanceBlock):
+                    #         LocalizedSourceIssue(
+                    #             sourceFile=self,
+                    #             level=Levels.Error,
+                    #             message='No opened usecase instance. Directive ignored.',
+                    #             line=_S.line_no
+                    #         )
+                    #     _S.main_block=None
+                    #     continue
 
             # ------------------------------------------------------
             # ---- USE error type1
@@ -1449,6 +1736,7 @@ class _SexOrSoilSource(ModelSourceFile):
                 +end)
             m = re.match(r, line)
             if m:
+                print('YES    '+r)
                 filename=m.group('filename')
                 assert filename=='input' # As far as we know
                 errline=m.group('line')
@@ -1481,16 +1769,55 @@ class _SexOrSoilSource(ModelSourceFile):
                 continue
 
             # ------------------------------------------------------
+            # ---- USE warning type2
+            # ------------------------------------------------------
+
+            r = begin + 'Warning:? *(?P<msg>.*)' + end
+            m = re.match(r, line)
+            if m:
+                LocalizedSourceIssue(
+                    sourceFile=self,
+                    level=Levels.Warning,
+                    message=m.group('msg'),
+                    line=_S.line_no
+                )
+                continue
+
+            # #---------------------------------
+            # # Line comment --
+            # #---------------------------------
+            #
+            # # TODO: check comment processing appiled in use parser
+            # Full line comment
+
+            r = begin + '--(?P<comment>[^@]?.*)' + end
+            m = re.match(r, line)
+            if m:
+
+                c = m.group('comment')
+                last_doc_comment.add(c)
+                continue
+
+            print('FF' * 10 + line)
+
+            # To be checked
+            last_doc_comment.clean()
+
+
+            # ------------------------------------------------------
             #---- Unrecognized line
             # ------------------------------------------------------
 
             LocalizedSourceIssue(
                 sourceFile=self,
                 level=Levels.Fatal,
-                message=('Cannot parse line #%i.'%_S.line_no),
+                message=('Error at line #%i.\n"%s"'%(
+                    _S.line_no,
+                    line)),
                 line=_S.line_no
             )
             continue
+
 
 
 
@@ -1568,7 +1895,11 @@ class SexSource(_SexOrSoilSource):
 
         try:
 
-            # ---- (1) preprocessing soil file ----------------
+            #--------------------------------------------------
+            # ---- (1) preprocessing input file ---------------
+            #--------------------------------------------------
+            # this generate a .soil file that can be read by
+            # USE
             if preprocessor is None:
                 preprocessed_soil_filename = originalFileName
             else:
@@ -1576,7 +1907,10 @@ class SexSource(_SexOrSoilSource):
                     issueOrigin=self,
                     filename=originalFileName)
 
+            #--------------------------------------------------
             # ---- (2) reusing preprocessed use file ----------
+            #--------------------------------------------------
+            #
             preprocessed_use_filename=Environment.getWorkerFileName(
                 basicFileName=replaceExtension(
                     self.classSource.fileName,
@@ -1595,9 +1929,13 @@ class SexSource(_SexOrSoilSource):
 
         except FatalError as e:
             # The fatal error has already registered. Do nothing
-            pass
+            return
 
         except Exception as e:
+            if DEBUG>=1:
+                import traceback
+                print('SXP: '+'*'*40+'Exception 1')
+                traceback.print_exc()
             # Some uncatched exception. Generate an error.
             # Not need to create a fatal one as the process
             # is already stopped.
@@ -1606,6 +1944,7 @@ class SexSource(_SexOrSoilSource):
                 level=Levels.Error,
                 message='Exception: %s' % str(e)
             )
+
             raise #? should it be better do just pass ?
     #
     # def __preprocessOriginalFile(self, preprocessor, originalFileName):
@@ -1634,13 +1973,9 @@ class SexSource(_SexOrSoilSource):
         #             level=Levels.Fatal,
         #             message='Class model is invalid' % self.fileName))
         if DEBUG>=2:
-            print((
-                'sxp: generating sex file from:\n'
-                '    use=%s\n'
-                '    soil=%s\n' ) % (
-                    useFileName,
-                    soilFileName
-                    ))
+            print('SXP: generating sex file from:')
+            print('SXP:    use=%s' % useFileName)
+            print('SXP:    soil=%s'% soilFileName )
 
         # Check that the soil file exists
         if not os.path.isfile(soilFileName):
@@ -1667,43 +2002,30 @@ class SexSource(_SexOrSoilSource):
                 prequelFileName=self.prequelFileName)
 
             if DEBUG >= 2:
-                print('sxp: sex file generation done (%s)' %
+                print('SXP: sex file generation done (%s)' %
                       sex_file)
                 print('       ')
             return sex_file
 
-        except Exception as e:
-            m='Error during USE execution: %s' % str(e)
+        except ValueError as e:
             if DEBUG>=1:
                 import traceback
-                print('spx: '+'*'*40+'Exception')
+                print('SXP: '+'*'*40+'Exception')
+                traceback.print_exc()
+            Issue(
+                origin=self,
+                level=Levels.Error,
+                message=str(e))
+
+        except Exception as e:
+            m='Unexpected error from merger: %s' % str(e)
+            if DEBUG>=1:
+                import traceback
+                print('SXP: '+'*'*40+'Exception from merger')
                 traceback.print_exc()
             Issue(
                 origin=self,
                 level=Levels.Fatal,
                 message=m)
 
-
-# class SoilSource(_SexOrSoilSource):
-#     """
-#     Source corresponding directly to the raw .soil source given
-#     as the parameter.
-#     WARNING: USE is *NOT* executed so some errors may
-#     be left undiscovered. Moreover, there is no cardinality check,
-#     no invariant checking, etc.
-#     From this soil source, one can get an object model.
-#     """
-#     def __init__(
-#             self,
-#             soilFileName):
-#             # classModel,
-#             # usecaseModel=None):
-#         #type: (Text, ClassModel) -> None
-#         super(SoilSource, self).__init__(
-#             evaluateScenario=False,
-#             soilFileName=soilFileName,
-#             parsePrefix='^',
-#             preIssueMessages=[])
-#         self.doParse(soilFileName)
-#
 

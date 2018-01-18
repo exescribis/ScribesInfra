@@ -1,21 +1,30 @@
 # coding=utf-8
 
 # TODO:0 create a scenario for valence/cci/pi
-# TODO:0 convert check results to errors
-# TODO:0 add test for enumeration parsing in cls + new syntax?
-# TODO:0 test and test error display + error detection among files
-# TODO:0 add "begin" "end" for scenario --@begin --@end -> check
-# TODO:0 add | text block to : (require analysis because before)
-#        object
-#        scenario
+# TODO:0 check koquery90 with assert/query mixture at top
+# TODO:0 check ? vs ?? + KOQuery03
+# TODO:0 check koinv04: display of cls,
+
+# TODO:0 locate model issues
+# TODO:1 change the syntax of assert. assert name : ....
+#        add name in metamodel and output
+#        assert inv a: False
+#        assert inv b: Failure
+#        assert inv b
+#        assert 2+3=5
+#        assert b : 2+6=3
+#
 # TODO:0 bind object/evaluation model issuebox with scenario
 #        otherwise there is no error reported when building objects
-# TODO:0 handle use message 'Nothing to do, because file' in merge
-#       check with us01scs  without ?0
-#       currently the merger generate an empty file
-#       is should be enough to first check soil line
-#       if not, just compile /use if imported
-#       otherwise just print comments
+# TODO:0 add | text block to : (require analysis because before)
+#        binding descriotion to elements is not compulsary
+#        object
+#        scenario
+# TODO:0 add inheritance in cl metamodel
+# TODO:0 add check for optional attributes in check
+# TODO:1 add check for id attributes in check
+# TODO:0 state begin and state end for objects
+# TODO:0 test and test error display + error detection among files
 # FIXME:0 display /tmp error in sex/use
 #        for metamodels, since composed metamodels are
 #        important (e.g. permissoion -> usecase)
@@ -23,7 +32,18 @@
 # FIXME:0 strange printing for models
 # TODO:0 check why empty entries are  ignored in glossary
 #       see domain2.gls
-# TODO:0 add inheritance in cl metamodel
+
+
+# CAVEAT1: Scenario must import a class model now
+#       This limitation should be removed.
+#       At the moment it this is required because scenarios
+#       are based on the pair use + soil
+#       Look at SexSource and check how to remove dependency on '.use"
+#       Looking at the case of empty scs file should help as well
+#       See test kosyntax21 kosyntax22
+#
+# TODO:1 datatype: definition + replacement
+# TODO:1 package: hierachy + tests
 # TODO:1 improve text block metrics with ref and word
 # TODO:1 add hierachyca metrics
 # TODO:1 refactor SourceElement and SourceModelElement
@@ -45,6 +65,7 @@
 #       model specific option. Currently the SecenarioPrinter
 #       add some attributs on the fly. This should be removed.
 # TODO:1 add constraint composition[0..1,1]
+
 # TODO:1 add sex parser to support composition
 # (ScribesEnv)jmfavre@jmfavre-HP-ZBook-15:/D2/ScribesZone/ModelScripts/test/modelscripts/testcases/sex$ use -qv composition.use composition3.soil
 # Warning: Insert has resulted in two aggregates for object `Wheel1'. Object `Wheel1' is already component of another object.
@@ -58,6 +79,78 @@
 # checked structure in 1ms.
 # checking invariants...
 # checked 0 invariants in 0.000s, 0 failures.
+
+"""
+Warning: Operation call ...
+This may lead to unexpected behavior.
+You can change this check using the -oclAnyCollectionsChecks switch.
+You can change this check using the -extendedTypeSystemChecks switch.
+
+Expression " + StringUtil.inQuotes(this.stringRep(args, "")) +
+					 " can never evaluate to more than an empty bag, " + StringUtil.NEWLINE +
+					 "because the element types " + StringUtil.inQuotes(elemType1) +
+					 " and " + StringUtil.inQuotes(elemType2) + " are unrelated.";
+		}
+
+			return "Expression " + StringUtil.inQuotes(this.stringRep(args, "")) +
+					 " will always evaluate to false, " + StringUtil.NEWLINE +
+					 "because the element type " + StringUtil.inQuotes(col.elemType()) +
+					 " and the parameter type " + StringUtil.inQuotes(args[1].type()) + " are unrelated.";
+
+*<input>:1:3: Warning: application of `oclIsKindOf' to a single value should be done with `.' instead of `->'.
+*Warning: Insert has resulted in a cycle in the part-whole hierarchy. Object `y' is a direct or indirect part of `x'.
+*Warning: Insert has resulted in two aggregates for object `z'. Object `z' is already component of another object.
+*Warning: Object `x' cannot be a part of itself.
+
+			return "Expression " + StringUtil.inQuotes(this.stringRep(args, "")) +
+					 " will always evaluate to the same ordered set, " + StringUtil.NEWLINE +
+					 "because the element type " + StringUtil.inQuotes(col.elemType()) +
+					 " and the parameter type " + StringUtil.inQuotes(args[1].type()) + " are unrelated.";
+
+
+?a1->selectByKind(B)
+* <input>:1:4: Warning: application of `selectByKind' to a single value should be done with `.' instead of `->'.
+The operation `selectByKind' is only applicable on collections.
+
+"""
+# TODO:0 Add Internal Fatal, Error, warning and move use trace to internal warning
+#        Error during USE execution: Unexpected line (#85) in use trace:
+#        "You can change this check using the -extendedTypeSystemChecks switch."
+#       Add -extendedTypeSystemChecks:I  -oclAnyCollectionsChecks:I
+
+"""
+Warning: Operation call ...
+This may lead to unexpected behavior.
+You can change this check using the -oclAnyCollectionsChecks switch.
+You can change this check using the -extendedTypeSystemChecks switch.
+
+Expression " + StringUtil.inQuotes(this.stringRep(args, "")) + 
+					 " can never evaluate to more than an empty bag, " + StringUtil.NEWLINE +
+					 "because the element types " + StringUtil.inQuotes(elemType1) + 
+					 " and " + StringUtil.inQuotes(elemType2) + " are unrelated.";
+		}
+
+			return "Expression " + StringUtil.inQuotes(this.stringRep(args, "")) + 
+					 " will always evaluate to false, " + StringUtil.NEWLINE +
+					 "because the element type " + StringUtil.inQuotes(col.elemType()) + 
+					 " and the parameter type " + StringUtil.inQuotes(args[1].type()) + " are unrelated.";
+
+*<input>:1:3: Warning: application of `oclIsKindOf' to a single value should be done with `.' instead of `->'.
+*Warning: Insert has resulted in a cycle in the part-whole hierarchy. Object `y' is a direct or indirect part of `x'.
+*Warning: Insert has resulted in two aggregates for object `z'. Object `z' is already component of another object.
+*Warning: Object `x' cannot be a part of itself.
+
+			return "Expression " + StringUtil.inQuotes(this.stringRep(args, "")) + 
+					 " will always evaluate to the same ordered set, " + StringUtil.NEWLINE +
+					 "because the element type " + StringUtil.inQuotes(col.elemType()) + 
+					 " and the parameter type " + StringUtil.inQuotes(args[1].type()) + " are unrelated.";
+
+
+?a1->selectByKind(B)
+* <input>:1:4: Warning: application of `selectByKind' to a single value should be done with `.' instead of `->'.
+The operation `selectByKind' is only applicable on collections.
+
+"""
 
 # TODO:1  relational class model checks
 # - pas d'association n-n
@@ -74,6 +167,7 @@
 # TODO:1 import between cl diagram could be very useful
 # TODO:2 add syntax enumeration x ... end
 #        easy for first and other lines, but must have context for "end"
+
 # TODO:2 Installation procedure.
 #       chmod +x for internal model-use
 #       chmox +x for bin/*

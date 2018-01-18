@@ -417,10 +417,11 @@ class CheckEvaluation(ReadOperationEvaluation):
         self.isNotImplemented=True
 
         self.invariantEvaluationByInvariant=OrderedDict()
-        #type:Dict[Invariant,InvariantEvaluation]
+        #type:Dict[Invariant, InvariantEvaluation]
 
         self.cardinalityEvaluationByRole = OrderedDict()
-        # type:Dict[Role,CardinalityEvaluation]
+        # type:Dict[Role, CardinalityEvaluation]
+
         self._eval()
 
     @property
@@ -454,7 +455,9 @@ class _USEImplementedCheckEvaluation(CheckEvaluation):
                  blockEvaluation,
                  op):
         #type: (Optional['BlockEvaluation'], Check) -> None
-        super(_USEImplementedCheckEvaluation, self).__init__(blockEvaluation, op)
+        super(_USEImplementedCheckEvaluation, self).__init__(
+            blockEvaluation,
+            op)
         self.isNotImplemented=False
         self.accesses = []
         self._eval()
@@ -498,7 +501,8 @@ class InvariantEvaluation(ModelElement):
                  invariant,
                  result=True):
         #type: (CheckEvaluation, Invariant, bool) -> None
-        ModelElement.__init__(self, invariant.model)
+        ModelElement.__init__(self,
+            checkEvaluation.model)
         self.checkEvaluation = checkEvaluation
         self.invariant = invariant
         self.checkEvaluation.invariantEvaluationByInvariant[invariant] = self
@@ -583,7 +587,8 @@ class CardinalityEvaluation(ModelElement):
     def __init__(self, checkEvaluation, role):
         #type: (CheckEvaluation, Role) -> None
 
-        ModelElement.__init__(self, model=role.model)
+        ModelElement.__init__(self,
+            model=checkEvaluation.model)
 
         self.checkEvaluation=checkEvaluation
         #type: CheckEvaluation
@@ -596,7 +601,7 @@ class CardinalityViolation(CardinalityEvaluation):
     """
     Cardinality violation for a given role. Various objects can
     violate the cardinality. These objects are represented by
-    a CardinalityViolationObjects
+    a list of CardinalityViolationObject.
 
     Looks like this in USE OCL::
 
@@ -612,7 +617,12 @@ class CardinalityViolation(CardinalityEvaluation):
         super(CardinalityViolation, self).__init__(checkEvaluation, role)
 
         self.role=role
-        assert(role not in self.checkEvaluation.cardinalityEvaluationByRole)
+
+        # Check that a cardinalityEvaluation is not already defined
+        # for that role. The client must ensure this. In particular
+        # a parser.
+        assert(role not in
+               self.checkEvaluation.cardinalityEvaluationByRole)
         self.checkEvaluation.cardinalityEvaluationByRole[role]=self
         self.violatingObjects=[]
 
