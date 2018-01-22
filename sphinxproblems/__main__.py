@@ -9,6 +9,7 @@ usage:
 
 import sys
 import os
+import sphinxproblems.engine
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == '__main__':
@@ -19,7 +20,10 @@ if __name__ == '__main__':
     source_directory = sys.argv[1]
     target_directory = sys.argv[2]
     clean = len(sys.argv)==4 and sys.argv[3]=='clean'
-    e = engine.SphinxProblemsEngine(source_directory, target_directory, clean=clean)
+    e = sphinxproblems.engine.SphinxProblemsEngine(
+        source_directory,
+        target_directory,
+        clean=clean)
     sys.exit(e.build())
 
 #     $(SPHINXBUILD) -q -b html $(ALLSPHINXOPTS) $(BUILDDIR) -w $(SHINXERRORSOUT) 2>/dev/null
