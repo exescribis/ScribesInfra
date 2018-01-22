@@ -1,8 +1,47 @@
-unicodecsv          # for typedtable
-python-dateutil     # module dateutil for typedtable
+# nothing for dbcase
+# nothing for pyschemaspy
 
-sqlalchemy          # for sqlhelpers
-sqlalchemy_utils    # for sqlhelpers
 
-gspread             # for googlehelpers
-oauth2client        # for googlehelpers
+six                 # for sphinxrelinks
+sphinx              # <- sphinxdata
+                    # <- sphinxproblems
+                    # <- sphinxrelinks
+                    # <- sphinx_rtd_theme
+                    # <- sphinxse
+                    # <- sphinxuseocl
+                    # <- sphinxutils
+                    # <- sphinxxrefs
+                    # <- sphinxcontrib_domaintools
+
+docutils            # <- sphinxdata
+                    # <- sphinxproblems
+                    # <- sphinxrelinks
+                    # <- sphinxse
+                    # <- sphinxutils
+                    # <- sphinxcontrib_domaintools
+
+
+pygments            # <- sphinxdata
+                    # <- sphinxuseocl
+
+sphinx_rtd_theme    # <- sphinxproblems
+                    # <- sphinxse/test
+
+
+sqlalchemy          # <- sqlhelpers
+
+sqlalchemy_utils    # <- sqlhelpers
+
+sqlparse            # <- sqlrst
+
+gspread             # <- googlehelpers
+
+oauth2client        # <- googlehelpers
+
+python-dateutil     # <- typedtable
+
+unicodecsv          # <- typedtable
+
+sphinxcontrib-images # <- conf.py
+
+sphinxcontrib-googlechart # <- conf.py

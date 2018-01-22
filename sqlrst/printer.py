@@ -6,7 +6,7 @@
 
 
 
-import structure
+import sqlrst.structure
 
 __all__ = ['blockSequenceToRst']
 

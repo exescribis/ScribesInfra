@@ -7,8 +7,8 @@ The comments can contain REST text.
 
 import filehelpers
 
-import parser
-import printer
+import sqlrst.parser
+import sqlrst.printer
 
 __all__ = ['sqlRst2Rst']
 

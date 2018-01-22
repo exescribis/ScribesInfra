@@ -46,6 +46,7 @@ class CommentBlock(Block):
     def text(self):
         return self.before+self.comment+self.after
 
+
 class BlockCommentBlock(CommentBlock):
     def __init__(self, comment, before='', after=''):
         super(BlockCommentBlock, self).__init__(comment, before, after)
@@ -54,6 +55,7 @@ class BlockCommentBlock(CommentBlock):
         return \
             re.sub('\*/\s*','',
                re.sub('\s*/\*','',self.comment))
+
 
 class LinesCommentBlock(CommentBlock):
     def __init__(self, comment, before='', after=''):
@@ -67,6 +69,7 @@ class LinesCommentBlock(CommentBlock):
             _.append(l)
         return '\n'.join(_)
 
+
 class SQLStatementBlock(Block):
 
     def __init__(self, sqlText):
@@ -76,21 +79,25 @@ class SQLStatementBlock(Block):
     def text(self):
         return self.sqlText
 
+
 class NamedBlock(Block):
 
     def __init__(self, name):
         Block.__init__(self)
         self.name = name
 
+
 class SelectStatementBlock(SQLStatementBlock, NamedBlock):
     def __init__(self, sqlText, name=None):
         NamedBlock.__init__(self, name)
         super(SelectStatementBlock, self).__init__(sqlText)
 
+
 class CreateTableStatementBlock(SQLStatementBlock, NamedBlock):
     def __init__(self, sqlText, name):
         NamedBlock.__init__(self, name)
         SQLStatementBlock.__init__(self, sqlText)
+
 
 class CreateViewStatementBlock(SQLStatementBlock, NamedBlock):
     def __init__(self, sqlText, name):

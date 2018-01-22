@@ -9,7 +9,7 @@ import re
 
 import sqlparse
 
-import structure
+import sqlrst.structure
 
 __all__ = ('sqlRstToBlockSequence',)
 

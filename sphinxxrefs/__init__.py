@@ -1,4 +1,4 @@
-import missingxrefs
+import sphinxxrefs.missingxrefs
 
 
 def setup(app):

@@ -14,7 +14,7 @@ THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 if __name__ == '__main__':
     sys.path.append(os.path.join(THIS_DIR,'..'))
 
-    import engine
+    import sphinxproblems.engine
     import filehelpers
     source_directory = sys.argv[1]
     target_directory = sys.argv[2]

@@ -4,7 +4,7 @@ Parse error message output by sphinx.
 """
 import re
 
-import problems
+import sphinxproblems.problems
 
 
 def shortenedMessage(message):

@@ -1,4 +1,4 @@
-import dir
+import sphinxgithub.dir
 
 
 def build_finished_handler(app, exception):

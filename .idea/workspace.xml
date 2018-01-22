@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1ab2adf8-aa09-4ef4-a9ce-b0d40108feb7" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/startgit.py" afterPath="$PROJECT_DIR$/setupgit.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="1ab2adf8-aa09-4ef4-a9ce-b0d40108feb7" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -39,7 +35,7 @@
         <entry file="file://$PROJECT_DIR$/setupgit.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="279">
-              <caret line="143" column="6" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="143" selection-end-column="30" />
+              <caret line="143" column="6" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="143" selection-end-column="30" />
               <folding>
                 <element signature="e#17#52#0" expanded="true" />
               </folding>
@@ -98,7 +94,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="x" value="85" />
     <option name="y" value="153" />
     <option name="width" value="1637" />
@@ -176,8 +172,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="85" y="153" width="1637" height="1026" extended-state="1" />
-    <editor active="true" />
+    <frame x="85" y="153" width="1637" height="1026" extended-state="0" />
     <layout>
       <window_info id="GfmBrowser" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -383,7 +378,7 @@
     <entry file="file://$PROJECT_DIR$/setupgit.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="279">
-          <caret line="143" column="6" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="143" selection-end-column="30" />
+          <caret line="143" column="6" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="143" selection-end-column="30" />
           <folding>
             <element signature="e#17#52#0" expanded="true" />
           </folding>
