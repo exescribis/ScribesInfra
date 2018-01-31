@@ -7,10 +7,9 @@ See http://pygithub.readthedocs.io/en/latest/github_objects/Issue.html for docum
 """
 
 import re
+rjazeklrn 
 
-import users
-import repositories
-import githubbot
+zekrjazlekjr
 
 def repos(username="", reporegexpr=None):
     o = users.org(username)
