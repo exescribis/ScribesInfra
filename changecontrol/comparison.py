@@ -66,8 +66,6 @@ PATTERNS = {
         'background' : None
     },
     Flag.RIGHT_FILE: {
-        'change.name':      'Added files',
-        'change.letter':    'A',
         'text' : '+ %s',
         'color' : 'green',
         'background' : None
