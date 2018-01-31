@@ -11,6 +11,7 @@ Add the extension in your configuration file (if not already done). ``conf.py`` 
         ...                # some extensions
         'sphinxrelinks',
         ...                # other extensions
+        something else
     ]
 
 
@@ -27,10 +28,6 @@ multiple arguments like::
 ..  _`sphinx.ext.extlinks`:
         http://www.sphinx-doc.org/en/stable/ext/extlinks.html
 
-
-Current state
--------------
-Work with the couple examples in test directory
 
 This extension should be improved for refspec parsing (e.g. use a regexp).
 
