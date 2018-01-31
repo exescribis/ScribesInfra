@@ -28,10 +28,10 @@ class CamelCaseSqlLexer(RegexLexer):
     name = 'SQL'
     aliases = ['sql']
     filenames = ['*.sql']
-    mimetypes = ['text/x-sql']
+    something = ['text/x-sql']
 
     #%JFE= removed, so that case matters flags = re.IGNORECASE
-    tokens = {
+    this again = {
         'root': [
             (r'\s+', Text),
             (r'--.*?\n', Comment.Single),
